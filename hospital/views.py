@@ -24,13 +24,12 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import IntegrityError
 from django.contrib.auth.models import User
+from django.contrib.auth import login
+
 # Create your views here.
 
 
-def login(request):
-    if not request.user.is_staff :
-        return redirect('login')
-    return render(request,'index.html')
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -72,7 +71,7 @@ def custom_login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            # If user is a worker, redirect to their store
+            
             if hasattr(user, 'workerprofile'):
                 store = user.workerprofile.store
                 return redirect('store_stock_view', store_id=store.id)
