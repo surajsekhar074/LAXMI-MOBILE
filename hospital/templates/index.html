@@ -1,0 +1,254 @@
+{% extends 'nvgbar.html' %}
+{% load static %}
+{% block body %}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #f3f4f6;
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        text-align: center;
+        color: #4f46e5;
+        font-size: 28px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        text-shadow: 0 0 4px rgba(79, 70, 229, 0.2);
+    }
+
+    .container-fluid {
+        padding: 40px 20px;
+    }
+
+    .btn {
+        background: linear-gradient(to right, #6366f1, #8b5cf6);
+        color: white;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 0 8px rgba(139, 92, 246, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+        transform: scale(1.02);
+    }
+
+    select, input[type="date"] {
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 15px;
+        width: 100%;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    #storeDropdown {
+        display: none;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .list-group-item {
+        background: #f0f4ff;
+        border: none;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .list-group-item a {
+        color: #4f46e5;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 10px;
+        display: block;
+    }
+
+    .list-group-item:hover {
+        background-color: #e0e7ff;
+        box-shadow: 0 0 6px rgba(99, 102, 241, 0.3);
+    }
+
+    .summary-boxes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .stock-box {
+        flex: 0 0 18%;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+        transition: all 0.3s ease;
+        font-size: 20px;
+        font-weight: bold;
+        color: #4338ca;
+    }
+
+    .stock-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    .stock-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #6b7280;
+        margin-top: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .stock-box {
+            flex: 0 0 40%;
+        }
+    }
+</style>
+
+
+<div class="container-fluid">
+    <h2>🧾 Store & Stock Overview</h2>
+
+    <div class="text-center mb-3">
+        <button class="btn" id="showStoreButton">
+            <i class="fas fa-eye"></i> Show Stores
+        </button>
+    </div>
+
+
+    <div id="storeDropdown" class="list-group mt-3">
+        {% for store in stores %}
+            <div class="list-group-item">
+                <a href="{% url 'store_stock_view' store.id %}">{{ store.name }}</a>
+            </div>
+        {% empty %}
+            <div class="list-group-item text-muted">No stores available</div>
+        {% endfor %}
+    </div>
+
+    <form method="GET" action="" class="row mb-4 mt-4">
+        <div class="col-md-5">
+            <select name="store_id" required>
+                <option value="">Select Store</option>
+                {% for store in stores %}
+                    <option value="{{ store.id }}" {% if request.GET.store_id == store.id|stringformat:"s" %}selected{% endif %}>
+                        {{ store.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-5">
+            <input type="date" name="date" value="{{ request.GET.date }}">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn w-100">Filter</button>
+        </div>
+    </form>
+
+    <div class="summary-boxes">
+        <div class="stock-box">
+            <i class="fas fa-boxes-stacked fa-lg mb-2"></i><br>
+            {{ totals.total_wehave|default:0 }}
+            <div class="stock-title">Opening Stock</div>
+        </div>
+        <div class="stock-box">
+            <i class="fas fa-plus-circle fa-lg mb-2"></i><br>
+            {{ totals.total_contact|default:0 }}
+            <div class="stock-title">Add Stock</div>
+        </div>
+        <div class="stock-box">
+            <i class="fas fa-cart-arrow-down fa-lg mb-2"></i><br>
+            {{ totals.total_sold|default:0 }}
+            <div class="stock-title">Sold Stock</div>
+        </div>
+        <div class="stock-box">
+            <i class="fas fa-cubes fa-lg mb-2"></i><br>
+            {{ totals.total_remaining|default:0 }}
+            <div class="stock-title">Remaining Stock</div>
+        </div>
+        <div class="stock-box">
+            <i class="fas fa-star-half-alt fa-lg mb-2"></i><br>
+            {{ totals.total_review|default:0 }}
+            <div class="stock-title">Different Stock</div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="d-flex justify-content-center mt-5">
+    <div style="width: 300px; height: 300px;">
+        <canvas id="stockChart"></canvas>
+    </div>
+</div>
+
+
+<script>
+    document.getElementById('showStoreButton').addEventListener('click', function () {
+        const dropdown = document.getElementById('storeDropdown');
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    });
+</script>
+<script>
+    const ctx = document.getElementById('stockChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Opening', 'Added', 'Sold', 'Remaining', 'Different'],
+            datasets: [{
+                label: 'Stock',
+                data: [
+                    {{ totals.total_wehave|default:0 }},
+                    {{ totals.total_contact|default:0 }},
+                    {{ totals.total_sold|default:0 }},
+                    {{ totals.total_remaining|default:0 }},
+                    {{ totals.total_review|default:0 }}
+                ],
+                backgroundColor: [
+                    '#6366f1',
+                    '#8b5cf6',
+                    '#ec4899',
+                    '#10b981',
+                    '#f59e0b'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '65%', // Inner radius to create "donut" shape
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'nvgbar.html' %}
+{% block body %}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Register Your Store</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="name" class="form-label">Store Name:</label>
+            <input type="text" name="name" id="name" class="form-control form-control-sm" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="location" class="form-label">Location:</label>
+            <input type="text" name="location" id="location" class="form-control form-control-sm" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-sm form-control">Submit</button>
+    </form>
+</div>
+
+<style>
+    body {
+        background-color: #f9f9f9;
+        font-family: 'Arial', sans-serif;
+    }
+
+    
+/* Default styles - Desktop first */
+
+/* --- MOBILE --- */
+@media (max-width: 768px) {
+    h2, h4 {
+        font-size: 22px;
+        text-align: center;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+
+    .btn, .modern-button {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+        width: 100%;
+        font-size: 16px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+}
+
+/* --- TABLET --- */
+@media (min-width: 769px) and (max-width: 1024px) {
+    h2, h4 {
+        font-size: 26px;
+    }
+
+    table {
+        font-size: 16px;
+    }
+
+    .btn, .modern-button {
+        font-size: 17px;
+        padding: 10px 20px;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select, textarea {
+        font-size: 16px;
+    }
+}
+
+
+
+    .container {
+        max-width: 600px;
+       
+        
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+       
+    }
+
+    h2 {
+        color: #1e3a8a;
+        font-weight: bold;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .form-control-sm {
+        height: 35px;
+        font-size: 14px;
+    }
+
+    .btn-primary {
+        background-color: #1e3a8a;
+        border: none;
+        font-size: 14px;
+    }
+
+    .btn-primary:hover {
+        background-color: #2b6cb0;
+    }
+
+    .form-control {
+        font-size: 14px;
+    }
+
+    .btn-sm {
+        padding: 8px 15px;
+    }
+
+    .mb-3 {
+        margin-bottom: 20px;
+    }
+</style>
+
+{% endblock %}

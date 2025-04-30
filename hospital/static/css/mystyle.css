@@ -1,0 +1,16 @@
+.nav-link{
+    color:white !important;
+}
+
+.nav-link:hover{
+    color:yellow !important;
+    background-color:lightblue;
+    border-radius:10px;
+}
+
+
+.nav-brand:hover{
+    color:yellow !important;
+    font-weight:bold
+}
+

@@ -1,0 +1,40 @@
+{% extends 'nvgbar.html' %}
+{% load static %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-12">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
+    <div class="text-center">
+      <h2 class="text-2xl font-bold text-gray-800">
+        Add User to <span class="text-indigo-600">{{ store.name }}</span>
+      </h2>
+      <p class="text-sm text-gray-500 mt-2">Fill in the details to create a user for this store.</p>
+    </div>
+
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+
+      <div>
+        <label for="username" class="block text-sm font-semibold text-gray-700">Username</label>
+        <input type="text" id="username" name="username" required
+               class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+               placeholder="Enter username">
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
+        <input type="password" id="password" name="password" required
+               class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+               placeholder="Enter password">
+      </div>
+
+      <div class="pt-4">
+        <button type="submit"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 text-green font-sans text-base font-bold py2 px6 rounded-lg shadow-md transition duration-200">
+          Create User
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

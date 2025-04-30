@@ -1,0 +1,132 @@
+{% extends 'nvgbar.html' %}
+{% block body %}
+
+<div class="container mt-4">
+    <div class="card shadow-lg rounded-4 p-4">
+        <h2 class="text-center mb-4 text-primary">Add Stock for: {{ store.name }}</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-floating mb-3">
+                <input type="date" name="date" id="date" class="form-control" required>
+                <label for="date">Date</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" readonly required>
+                <label for="wehave">Opening Stock</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="number" id="contact" name="contact" class="form-control" oninput="calculateRemaining()" required>
+                <label for="contact">Add Stock</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="number" id="sold_today" name="sold_today" class="form-control" oninput="calculateRemaining()" required>
+                <label for="sold_today">Sold Stock</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="number" id="remaining" name="remaining" class="form-control" value="{{ yesterday_remaining }}" readonly required>
+                <label for="remaining">Remaining Stock</label>
+            </div>
+
+            <div class="form-floating mb-4">
+                <input type="number" id="review" name="review" class="form-control" oninput="calculateRemaining()"required>
+                <label for="review">Review (Optional)</label>
+            </div>
+
+            <input type="hidden" name="store_id" value="{{ store.id }}">
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-gradient">💾 Save Stock</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JS: Recalculate remaining -->
+<script>
+    function calculateRemaining() {
+        var wehave = parseInt(document.getElementById('wehave').value) || 0;
+        var contact = parseInt(document.getElementById('contact').value) || 0;
+        var sold_today = parseInt(document.getElementById('sold_today').value) || 0;
+        document.getElementById('remaining').value = wehave + contact - sold_today;
+    }
+    window.onload = calculateRemaining;
+</script>
+
+<!-- Styles -->
+<style>
+    .container {
+        max-width: 600px;
+        height: 100px;
+        margin: auto;
+    }
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f1f4f9;
+        color: #333;
+    }
+
+    .card {
+        background: white;
+        border: none;
+        border-radius: 16px;
+    }
+
+    .form-floating > label {
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        height: 30px;
+    }
+
+    .form-control:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    }
+
+    h2 {
+        font-weight: 600;
+        color: #1e3a8a;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border: none;
+        color: white;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-gradient:hover {
+        background: linear-gradient(135deg, #2575fc, #6a11cb);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .form-control {
+            height: 45px;
+            font-size: 15px;
+        }
+
+        h2 {
+            font-size: 22px;
+        }
+
+        .btn-gradient {
+            font-size: 15px;
+        }
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'nvgbar.html' %}
+{% block body %}
+
+<h2 class="text-center mt-4">{{ store.name }} - Stock Details</h2>
+
+<div class="container mt-4">
+
+    <!-- Add Stock Button -->
+    <div class="text-end mb-3">
+        <a href="{% url 'add_stock' store.id %}" class="btn btn-success modern-button">+ Add Stock</a>
+    </div>
+
+    {% if stock_records %}
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered table-striped modern-table">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Opening Stock</th>
+                        <th>Added Stock</th>
+                        <th>Sold Stock</th>
+                        <th>Remaining Stock</th>
+                        <th>Review</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in stock_records %}
+                        <tr>
+                            <td>{{ stock.date }}</td>
+                            <td>{{ stock.wehave }}</td>
+                            <td>{{ stock.contact }}</td>
+                            <td>{{ stock.sold_today }}</td>
+                            <td>{{ stock.remaining }}</td>
+                            <td>{{ stock.review }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-warning text-center">No stock records available for this store.</div>
+    {% endif %}
+
+</div>
+
+<!-- Styles -->
+<style>
+    .modern-button {
+        font-size: 16px;
+        font-weight: bold;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 30px;
+        color: white;
+        text-transform: uppercase;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .modern-button:hover {
+        background: linear-gradient(135deg, #2575fc, #6a11cb);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .modern-table {
+        font-family: 'Segoe UI', sans-serif;
+        border-radius: 10px;
+        overflow: hidden;
+        font-size: 15px;
+    }
+
+    .modern-table thead {
+        background-color: #1e3a8a;
+        color: #fff;
+    }
+
+    .modern-table th, .modern-table td {
+        padding: 12px;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .modern-table tbody tr:hover {
+        background-color: #eef2ff;
+        cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+        .modern-table th, .modern-table td {
+            font-size: 13px;
+            padding: 10px 5px;
+        }
+
+        .modern-button {
+            width: 100%;
+        }
+    }
+</style>
+
+{% endblock %}
