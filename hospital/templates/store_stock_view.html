@@ -1,7 +1,12 @@
 {% extends 'nvgbar.html' %}
 {% block body %}
 
-<h2 class="text-center mt-4">{{ store.name }} - Stock Details</h2>
+<div class="mt-3">
+    <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
+</div>
+
+
+<h2 class="text-center mt-4">{{ store.location }} - report</h2>
 
 <div class="container mt-4">
 
@@ -16,22 +21,32 @@
                 <thead class="table-dark">
                     <tr>
                         <th>Date</th>
-                        <th>Opening Stock</th>
+                        {% if request.user.is_staff %}
+                            <th>Opening Stock</th>
+                        {% endif %}
+                        <th>System</th>
                         <th>Added Stock</th>
                         <th>Sold Stock</th>
                         <th>Remaining Stock</th>
-                        <th>Review</th>
+                        {% if request.user.is_staff %}
+                            <th>Review</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
                     {% for stock in stock_records %}
                         <tr>
                             <td>{{ stock.date }}</td>
-                            <td>{{ stock.wehave }}</td>
+                            {% if request.user.is_staff %}
+                                <td>{{ stock.wehave }}</td>
+                            {% endif %}
+                            <td>{{ stock.system }}</td>
                             <td>{{ stock.contact }}</td>
                             <td>{{ stock.sold_today }}</td>
                             <td>{{ stock.remaining }}</td>
-                            <td>{{ stock.review }}</td>
+                            {% if request.user.is_staff %}
+                                <td>{{ stock.review }}</td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -42,6 +57,7 @@
     {% endif %}
 
 </div>
+
 
 <!-- Styles -->
 <style>

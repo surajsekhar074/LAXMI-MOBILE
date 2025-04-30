@@ -19,6 +19,7 @@ class Stock(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateTimeField(null=True, blank=True)
     wehave = models.IntegerField(default=0)
+    system = models.IntegerField()
     contact = models.IntegerField()  # items added today
     sold_today = models.IntegerField(blank=True, null=True)
 
@@ -34,6 +35,8 @@ class Stock(models.Model):
         
         # Calculate remaining stock
         self.remaining = self.wehave + self.contact - (self.sold_today or 0)
+        self.system = int(self.system) if self.system is not None else 0
+        self.review = self.wehave - self.system
         
         # Save the instance
         super(Stock, self).save(*args, **kwargs)
@@ -42,6 +45,8 @@ class Stock(models.Model):
 
     def __str__(self):
         return f"Stock on {self.date}"
+    
+
     
 
 

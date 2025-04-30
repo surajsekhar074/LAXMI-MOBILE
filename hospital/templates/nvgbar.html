@@ -133,31 +133,55 @@
     <div class="sidebar-header">
       <i class="fas fa-box"></i> STOCK MANAGE
     </div>
+    {% if request.user.is_staff %}
+    <div class="text-center mb-3">
+      <button class="btn" id="showStoreButton">
+          <i class="fas fa-eye"></i> Show Stores
+      </button>
+    </div>
+    
+
+
+  <div id="storeDropdown" class="list-group mt-3">
+      {% for store in stores %}
+          <div class="list-group-item">
+              <a href="{% url 'store_stock_view' store.id %}">{{ store.name }}</a>
+          </div>
+      {% empty %}
+          <div class="list-group-item text-muted">No stores available</div>
+      {% endfor %}
+
+      
+  </div>
+  {% endif %}
     <ul class="nav flex-column mt-4">
       {% if request.user.is_authenticated %}
+      {% if request.user.is_staff %}
         <li>
           <a href="{% url 'home' %}"><i class="fas fa-store"></i> Home</a>
         </li>
+        {% endif %}
         {% if request.user.is_staff %}
+        
         <li>
           <a href="{% url 'register_store' %}"><i class="fas fa-plus"></i> Add Store</a>
         </li>
         {% endif %}
 
         {% if request.user.is_staff %}
-<li class="nav-item">
-  <a href="#addUserDropdown" class="nav-link" data-toggle="collapse" aria-expanded="false">
-    <i class="fas fa-user-plus"></i> Add User <i class="fas fa-caret-down float-right"></i>
-  </a>
-  <div class="collapse" id="addUserDropdown">
-    <ul class="nav flex-column ml-3">
-      {% for store in stores %}
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'admin_add_user' store.id %}">
-          <i class="fas fa-store-alt"></i> {{ store.name }}
-        </a>
-      </li>
-      {% endfor %}
+    <li class="nav-item">
+      <a href="#addUserDropdown" class="nav-link" data-toggle="collapse" aria-expanded="false">
+        <i class="fas fa-user-plus"></i> Add User <i class="fas fa-caret-down float-right"></i>
+      </a>
+      <div class="collapse" id="addUserDropdown">
+        <ul class="nav flex-column ml-3">
+          {% for store in stores %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'admin_add_user' store.id %}">
+              <i class="fas fa-store-alt"></i> {{ store.name }}
+            </a>
+          </li>
+          {% endfor %}
     </ul>
   </div>
 </li>

@@ -1,10 +1,17 @@
 {% extends 'nvgbar.html' %}
 {% block body %}
 
+
+
+<div class="mt-3">
+    <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
+</div>
+
+
 <div class="container mt-4">
     <div class="card shadow-lg rounded-4 p-4">
         <h2 class="text-center mb-4 text-primary">Add Stock for: {{ store.name }}</h2>
-
+       
         <form method="post">
             {% csrf_token %}
 
@@ -12,10 +19,17 @@
                 <input type="date" name="date" id="date" class="form-control" required>
                 <label for="date">Date</label>
             </div>
-
+            {% if request.user.is_staff %}
             <div class="form-floating mb-3">
-                <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" readonly required>
+                <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" oninput="calculateReview()" readonly required>
                 <label for="wehave">Opening Stock</label>
+            </div>
+            {% endif %}
+
+            
+            <div class="form-floating mb-3">
+                <input type="number" id="system" name="system" class="form-control" oninput="calculateReview()" required>
+                <label for="system">system</label>
             </div>
 
             <div class="form-floating mb-3">
@@ -27,17 +41,18 @@
                 <input type="number" id="sold_today" name="sold_today" class="form-control" oninput="calculateRemaining()" required>
                 <label for="sold_today">Sold Stock</label>
             </div>
-
+            
             <div class="form-floating mb-3">
                 <input type="number" id="remaining" name="remaining" class="form-control" value="{{ yesterday_remaining }}" readonly required>
-                <label for="remaining">Remaining Stock</label>
+                <label for="remaining">Closing Stock</label>
             </div>
-
+            {% if request.user.is_staff %}
             <div class="form-floating mb-4">
-                <input type="number" id="review" name="review" class="form-control" oninput="calculateRemaining()"required>
-                <label for="review">Review (Optional)</label>
+                <input type="number" id="review" name="review" class="form-control" value="0" readonly required>
+                <label for="review">Review</label>
             </div>
-
+            
+            {% endif %}
             <input type="hidden" name="store_id" value="{{ store.id }}">
 
             <div class="d-grid">
@@ -56,7 +71,19 @@
         document.getElementById('remaining').value = wehave + contact - sold_today;
     }
     window.onload = calculateRemaining;
+
+    function calculateReview() {
+        var wehave = parseInt(document.getElementById('wehave').value) || 0;
+        var system = parseInt(document.getElementById('system').value) || 0;
+        document.getElementById('review').value = wehave - system;
+    }
+
+    window.onload = function() {
+        calculateRemaining();
+        calculateReview();
+    };
 </script>
+
 
 <!-- Styles -->
 <style>

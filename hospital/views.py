@@ -71,7 +71,6 @@ def custom_login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            
             if hasattr(user, 'workerprofile'):
                 store = user.workerprofile.store
                 return redirect('store_stock_view', store_id=store.id)
@@ -159,9 +158,10 @@ def add_stock(request, store_id):
         date = request.POST.get('date')
         contact = int(request.POST.get('contact'))
         sold_today = int(request.POST.get('sold_today'))
-        review = request.POST.get('review')  # Get the review field
+        system = int(request.POST.get('system'))  # Convert to int
 
         wehave = yesterday_remaining
+        review = wehave - system  # This is now safe
         remaining = wehave + contact - sold_today
 
         # Save the stock entry
@@ -169,10 +169,11 @@ def add_stock(request, store_id):
             store=store,
             date=date,
             wehave=wehave,
+            system=system,
             contact=contact,
             sold_today=sold_today,
             remaining=remaining,
-            review=review  # Save the review
+            review=review
         )
 
         return redirect('store_stock_view', store_id=store.id)

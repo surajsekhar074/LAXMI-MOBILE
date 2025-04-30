@@ -49,7 +49,7 @@ urlpatterns = [
     path('accounts/redirect/', redirect_to_store_stock, name='login_redirect'),
     
     path('login/', custom_login_view, name='login'),
-    path('admin/', admin.site.urls),
+    
     path('store/<int:store_id>/admin_add_user/', add_user_to_store, name='admin_add_user'),
 
     
