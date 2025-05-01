@@ -16,9 +16,11 @@
             {% csrf_token %}
 
             <div class="form-floating mb-3">
-                <input type="date" name="date" id="date" class="form-control" required>
+                <input type="date" name="date" id="date" class="form-control"
+                       value="{{ today }}" min="{{ today }}" required>
                 <label for="date">Date</label>
             </div>
+            
             {% if request.user.is_staff %}
             <div class="form-floating mb-3">
                 <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" oninput="calculateReview()" readonly required>

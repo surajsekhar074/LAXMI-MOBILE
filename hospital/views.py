@@ -23,8 +23,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import IntegrityError
-from django.contrib.auth.models import User
-from django.contrib.auth import login
+from datetime import date
+
 
 # Create your views here.
 
@@ -103,6 +103,7 @@ def index(request):
     # Now do the aggregation based on the filtered stocks
     totals = stocks.aggregate(
         total_wehave=Sum('wehave'),
+        total_system=Sum('system'),
         total_contact=Sum('contact'),
         total_sold=Sum('sold_today'),
         total_remaining=Sum('remaining'),
@@ -145,6 +146,7 @@ def register_store(request):
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 @login_required
 def add_stock(request, store_id):
     store = get_object_or_404(Store, id=store_id)
@@ -152,10 +154,12 @@ def add_stock(request, store_id):
     # Get yesterday's stock entry if available, otherwise default to 0
     yesterday_stock = Stock.objects.filter(store=store).order_by('-date').first()
     yesterday_remaining = yesterday_stock.remaining if yesterday_stock else 0
+    today = date.today().isoformat()
 
     if request.method == 'POST':
         # Get values from the submitted form
-        date = request.POST.get('date')
+        form_date = request.POST.get('date')
+
         contact = int(request.POST.get('contact'))
         sold_today = int(request.POST.get('sold_today'))
         system = int(request.POST.get('system'))  # Convert to int
@@ -167,7 +171,7 @@ def add_stock(request, store_id):
         # Save the stock entry
         Stock.objects.create(
             store=store,
-            date=date,
+            date=form_date,
             wehave=wehave,
             system=system,
             contact=contact,
@@ -181,6 +185,7 @@ def add_stock(request, store_id):
     return render(request, 'add_stock.html', {
         'store': store,
         'yesterday_remaining': yesterday_remaining,
+        'today': today,
     })
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -236,6 +241,14 @@ def add_user_to_store(request, store_id):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from django.http import HttpResponse
+
+from django.urls import path
+
+urlpatterns = [
+    path('', lambda request: HttpResponse("Hello This is LAXMI MOBILE")),
+    # or point to your home view
+]
 
 
 

@@ -1,9 +1,10 @@
 {% extends 'nvgbar.html' %}
 {% block body %}
-
+{% if request.user.is_staff %}
 <div class="mt-3">
     <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
 </div>
+{% endif %}
 
 
 <h2 class="text-center mt-4">{{ store.location }} - report</h2>
