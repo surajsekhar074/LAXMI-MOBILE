@@ -11,14 +11,20 @@
 
 <div class="container mt-4">
 
+    
+    
+
     <!-- Add Stock Button -->
     <div class="text-end mb-3">
         <a href="{% url 'add_stock' store.id %}" class="btn btn-success modern-button">+ Add Stock</a>
     </div>
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search stock records..." onkeyup="searchTable()">
+    </div>
 
     {% if stock_records %}
         <div class="table-responsive">
-            <table class="table table-hover table-bordered table-striped modern-table">
+            <table id="stockTable" class="table table-hover table-bordered table-striped modern-table">
                 <thead class="table-dark">
                     <tr>
                         <th>Date</th>
@@ -52,6 +58,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            
         </div>
     {% else %}
         <div class="alert alert-warning text-center">No stock records available for this store.</div>
@@ -109,6 +116,7 @@
         .modern-table th, .modern-table td {
             font-size: 13px;
             padding: 10px 5px;
+            width:60px
         }
 
         .modern-button {
@@ -116,5 +124,62 @@
         }
     }
 </style>
+
+<script>
+    function searchTable() {
+        var input = document.getElementById("searchInput");
+        var filter = input.value.toUpperCase();
+        var table = document.getElementById("stockTable");
+        var tr = table.getElementsByTagName("tr");
+
+        // Loop through all table rows
+        for (var i = 1; i < tr.length; i++) { // Start at 1 to skip the header row
+            var showRow = false; // Flag to determine whether to show the row or not
+            var td = tr[i].getElementsByTagName("td");
+
+            // Loop through all table cells in each row
+            for (var j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    var txtValue = td[j].textContent || td[j].innerText;
+
+                    // If the cell text contains the search term
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        showRow = true; // Mark the row for showing
+                        highlightText(td[j], filter); // Highlight matching text
+                    } else {
+                        // Reset the cell content to remove any previous highlights
+                        td[j].innerHTML = td[j].textContent || td[j].innerText;
+                    }
+                }
+            }
+
+            // Show or hide the row based on the flag
+            tr[i].style.display = showRow ? "" : "none";
+        }
+    }
+
+    function highlightText(cell, searchTerm) {
+        var cellText = cell.textContent || cell.innerText;
+        var matchIndex = cellText.toUpperCase().indexOf(searchTerm.toUpperCase());
+
+        if (matchIndex > -1) {
+            var beforeMatch = cellText.substring(0, matchIndex);
+            var match = cellText.substring(matchIndex, matchIndex + searchTerm.length);
+            var afterMatch = cellText.substring(matchIndex + searchTerm.length);
+
+            // Update the cell's HTML with bolded matching text
+            cell.innerHTML = beforeMatch + '<span class="highlight">' + match + '</span>' + afterMatch;
+        }
+    }
+</script>
+
+<style>
+    .highlight {
+        font-weight: bold;
+        color: green; /* Optional: Change color of the highlighted text */
+    }
+</style>
+v
+
 
 {% endblock %}
