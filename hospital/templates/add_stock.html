@@ -32,17 +32,17 @@
           
 
             <div class="form-floating mb-3">
-                <input type="number" id="contact" name="contact" class="form-control" oninput="calculateReview()" required>
+                <input type="number" id="contact" name="contact" class="form-control"  required>
                 <label for="contact">Add Stock</label>
             </div>
 
             <div class="form-floating mb-3">
-                <input type="number" id="sold_today" name="sold_today" class="form-control" oninput="calculateReview()" required>
+                <input type="number" id="sold_today" name="sold_today" class="form-control"  required>
                 <label for="sold_today">Sold Stock</label>
             </div>
             <div class="form-floating mb-3">
                 <input type="number" id="system" name="system" class="form-control" oninput="calculateReview()" required>
-                <label for="system">system</label>
+                <label for="system">System</label>
             </div>
 
             
@@ -51,8 +51,12 @@
                 <label for="remaining">Closing Stock</label>
             </div>
             <div class="form-floating mb-3">
+                <input type="number" id="review" name="review" class="form-control" readonly required>
+                <label for="review">Review</label>
+            </div>
+            <div class="form-floating mb-3">
                 <textarea class="form-control" id="note" name="note" placeholder="Describe any issue..."></textarea>
-                <label for="note">Issue Note (optional)</label>
+                <label for="note">Issue Note</label>
             </div>
             
             
@@ -69,41 +73,37 @@
 
 <!-- JS: Recalculate remaining -->
 <script>
-    function calculateReview() {
-        const wehave = parseInt(document.getElementById('wehave')?.value) || 0;
-        const contact = parseInt(document.getElementById('contact')?.value) || 0;
-        const sold = parseInt(document.getElementById('sold_today')?.value) || 0;
-        const system = parseInt(document.getElementById('system')?.value) || 0;
-        const entered_remaining = parseInt(document.getElementById('remaining')?.value) || 0;
+function calculateReview() {
+    const system = parseInt(document.getElementById('system')?.value) || 0;
+    const remaining = parseInt(document.getElementById('remaining')?.value) || 0;
 
-        const expected_remaining = wehave + contact - sold;
+    // Calculate the review as system - remaining stock
+    const review = system - remaining;
 
-        const closing_discrepancy = expected_remaining - entered_remaining;
-        const system_discrepancy = wehave - system;
+    // Set the review value to the form input field
+    document.getElementById('review').value = review;
+}
 
-        const total_review = closing_discrepancy + system_discrepancy;
+window.onload = function () {
+    calculateReview();
+};
 
-        document.getElementById('review').value = total_review;
-    }
-
-    window.onload = function () {
-        calculateReview();
-    };
 </script>
 
 
 
-<!-- Styles -->
 <style>
     .container {
         max-width: 600px;
         height: 100px;
         margin: auto;
     }
+
     body {
         font-family: 'Segoe UI', sans-serif;
         background-color: #f1f4f9;
         color: #333;
+        font-weight: bold;  /* Make all text bold */
     }
 
     .card {
@@ -115,11 +115,13 @@
     .form-floating > label {
         font-size: 14px;
         color: #6c757d;
+        font-weight: bold; /* Ensure label text is bold */
     }
 
     .form-control {
         border-radius: 10px;
         height: 30px;
+        font-weight: bold;  /* Make input text bold */
     }
 
     .form-control:focus {
@@ -128,8 +130,9 @@
     }
 
     h2 {
-        font-weight: 600;
+        font-weight: 700;
         color: #1e3a8a;
+        text-shadow: 0 0 8px rgba(30, 58, 138, 0.6); /* Glowing effect */
     }
 
     .btn-gradient {
@@ -140,6 +143,7 @@
         font-size: 16px;
         border-radius: 30px;
         transition: all 0.3s ease;
+        font-weight: bold;
     }
 
     .btn-gradient:hover {
@@ -163,5 +167,6 @@
         }
     }
 </style>
+
 
 {% endblock %}

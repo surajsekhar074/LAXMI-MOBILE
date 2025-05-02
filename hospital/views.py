@@ -149,10 +149,10 @@ def register_store(request):
 
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Store, Stock
-from .utils import save_note_to_cache
-  # Import the helper function
+from .utils import save_note_to_cache  # Import the helper function
 from django.utils import timezone
 from datetime import date
+from django.contrib.auth.decorators import login_required
 
 @login_required
 def add_stock(request, store_id):
@@ -169,15 +169,15 @@ def add_stock(request, store_id):
         entered_remaining = int(request.POST.get('remaining'))
         note = request.POST.get('note', '')
 
+        # Use yesterday's remaining stock value as wehave
         wehave = yesterday_remaining
-        expected_remaining = wehave + contact - sold_today
-        review = (expected_remaining - entered_remaining) + (wehave - system)
 
         # Save the note if present
         note_text = note.strip()
         if note_text:
             save_note_to_cache(note_text, request.user)  # Call the helper function
 
+        # Create new stock record with review calculation based on system and remaining stock
         Stock.objects.create(
             store=store,
             date=form_date,
@@ -186,7 +186,7 @@ def add_stock(request, store_id):
             sold_today=sold_today,
             system=system,
             remaining=entered_remaining,
-            review=review
+            review=system - entered_remaining  # Calculate review directly based on system and remaining
         )
 
         return redirect('store_stock_view', store_id=store.id)
@@ -196,6 +196,8 @@ def add_stock(request, store_id):
         'yesterday_remaining': yesterday_remaining,
         'today': today,
     })
+
+
 
 
 

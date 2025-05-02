@@ -71,6 +71,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'hospital.context_processors.admin_notifications',
+                'hospital.context_processors.store_list',
+
 
                 
  

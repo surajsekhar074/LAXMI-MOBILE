@@ -126,7 +126,7 @@
 
 
 <div class="container-fluid">
-    <h2>🧾 Store & Stock </h2>
+    <h2>🧾 PREOWN REPORTS </h2>
 
    
 
@@ -148,6 +148,13 @@
             <button type="submit" class="btn w-100">Filter</button>
         </div>
     </form>
+    {% if request.GET.store_id %}
+    <form method="GET" action="" class="row mt-4">
+        <div class="col-md-12">
+            <button type="submit" name="action" value="total" class="btn w-100">Total</button>
+        </div>
+    </form>
+     {% endif %}
 
     <div class="summary-boxes">
         <div class="stock-box">
@@ -173,7 +180,7 @@
         <div class="stock-box">
             <i class="fas fa-cubes fa-lg mb-2"></i><br>
             {{ totals.total_remaining|default:0 }}
-            <div class="stock-title">Remaining Stock</div>
+            <div class="stock-title">Physical Stock</div>
         </div>
         <div class="stock-box">
             <i class="fas fa-star-half-alt fa-lg mb-2"></i><br>

@@ -47,3 +47,12 @@ def get_notifications(request):
     
     return {'notifications': notifications}
 
+
+
+
+from .models import Store
+
+def store_list(request):
+    stores = Store.objects.all()
+    return {'stores': stores}
+

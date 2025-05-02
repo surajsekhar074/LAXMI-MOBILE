@@ -134,22 +134,28 @@
       <i class="fas fa-box"></i> STOCK MANAGE
     </div>
     {% if request.user.is_staff %}
-    <div class="text-center mb-3">
-      <button class="btn" id="showStoreButton">
-          <i class="fas fa-eye"></i> Show Stores
+    
+
+
+
+
+
+    <div class="dropdown text-center mb-3">
+      <button class="btn btn-primary dropdown-toggle" type="button" id="storeDropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-eye"></i> Show Stores
       </button>
+      <div class="dropdown-menu" aria-labelledby="storeDropdownMenu">
+        {% for store in stores %}
+          <a class="dropdown-item" href="{% url 'store_stock_view' store.id %}">{{ store.name }}</a>
+        {% empty %}
+          <span class="dropdown-item text-muted">No stores available</span>
+        {% endfor %}
+      </div>
     </div>
     
 
 
-  <div id="storeDropdown" class="list-group mt-3">
-      {% for store in stores %}
-          <div class="list-group-item">
-              <a href="{% url 'store_stock_view' store.id %}">{{ store.name }}</a>
-          </div>
-      {% empty %}
-          <div class="list-group-item text-muted">No stores available</div>
-      {% endfor %}
+
 
       
   </div>
