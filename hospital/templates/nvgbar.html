@@ -187,6 +187,26 @@
 </li>
 {% endif %}
 
+
+{% if request.user.is_staff %}
+<div class="notification-icon">
+  <a href="{% url 'notifications_view' %}">
+      <span class="badge">{{ notifications|length }}</span> Notifications
+  </a>
+</div>
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
         <li>
           <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </li>

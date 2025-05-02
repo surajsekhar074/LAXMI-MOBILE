@@ -3,14 +3,14 @@
 
 
 
-<div class="mt-3">
+<div class="mt-3 d-flex justify-content-end">
     <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
 </div>
 
 
 <div class="container mt-4">
     <div class="card shadow-lg rounded-4 p-4">
-        <h2 class="text-center mb-4 text-primary"> Add Report: {{ store.location }}</h2>
+        <h2 class="text-center mb-4 text-primary"> Add Report</h2>
        
         <form method="post">
             {% csrf_token %}
@@ -29,32 +29,35 @@
             {% endif %}
 
             
+          
+
+            <div class="form-floating mb-3">
+                <input type="number" id="contact" name="contact" class="form-control" oninput="calculateReview()" required>
+                <label for="contact">Add Stock</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="number" id="sold_today" name="sold_today" class="form-control" oninput="calculateReview()" required>
+                <label for="sold_today">Sold Stock</label>
+            </div>
             <div class="form-floating mb-3">
                 <input type="number" id="system" name="system" class="form-control" oninput="calculateReview()" required>
                 <label for="system">system</label>
             </div>
 
-            <div class="form-floating mb-3">
-                <input type="number" id="contact" name="contact" class="form-control" oninput="calculateRemaining()" required>
-                <label for="contact">Add Stock</label>
-            </div>
-
-            <div class="form-floating mb-3">
-                <input type="number" id="sold_today" name="sold_today" class="form-control" oninput="calculateRemaining()" required>
-                <label for="sold_today">Sold Stock</label>
-            </div>
             
             <div class="form-floating mb-3">
-                <input type="number" id="remaining" name="remaining" class="form-control" value="{{ yesterday_remaining }}" readonly required>
+                <input type="number" id="remaining" name="remaining" class="form-control" required oninput="calculateReview()">
                 <label for="remaining">Closing Stock</label>
             </div>
-            {% if request.user.is_staff %}
-            <div class="form-floating mb-4">
-                <input type="number" id="review" name="review" class="form-control" value="0" readonly required>
-                <label for="review">Review</label>
+            <div class="form-floating mb-3">
+                <textarea class="form-control" id="note" name="note" placeholder="Describe any issue..."></textarea>
+                <label for="note">Issue Note (optional)</label>
             </div>
             
-            {% endif %}
+            
+
+           
             <input type="hidden" name="store_id" value="{{ store.id }}">
 
             <div class="d-grid">
@@ -66,25 +69,28 @@
 
 <!-- JS: Recalculate remaining -->
 <script>
-    function calculateRemaining() {
-        var wehave = parseInt(document.getElementById('wehave').value) || 0;
-        var contact = parseInt(document.getElementById('contact').value) || 0;
-        var sold_today = parseInt(document.getElementById('sold_today').value) || 0;
-        document.getElementById('remaining').value = wehave + contact - sold_today;
-    }
-    window.onload = calculateRemaining;
-
     function calculateReview() {
-        var wehave = parseInt(document.getElementById('wehave').value) || 0;
-        var system = parseInt(document.getElementById('system').value) || 0;
-        document.getElementById('review').value = wehave - system;
+        const wehave = parseInt(document.getElementById('wehave')?.value) || 0;
+        const contact = parseInt(document.getElementById('contact')?.value) || 0;
+        const sold = parseInt(document.getElementById('sold_today')?.value) || 0;
+        const system = parseInt(document.getElementById('system')?.value) || 0;
+        const entered_remaining = parseInt(document.getElementById('remaining')?.value) || 0;
+
+        const expected_remaining = wehave + contact - sold;
+
+        const closing_discrepancy = expected_remaining - entered_remaining;
+        const system_discrepancy = wehave - system;
+
+        const total_review = closing_discrepancy + system_discrepancy;
+
+        document.getElementById('review').value = total_review;
     }
 
-    window.onload = function() {
-        calculateRemaining();
+    window.onload = function () {
         calculateReview();
     };
 </script>
+
 
 
 <!-- Styles -->

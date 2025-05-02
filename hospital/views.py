@@ -104,8 +104,7 @@ def index(request):
     totals = stocks.aggregate(
         total_wehave=Sum('wehave'),
         total_system=Sum('system'),
-        total_contact=Sum('contact'),
-        total_sold=Sum('sold_today'),
+        total_contact=Sum('contact'),  total_sold=Sum('sold_today'),
         total_remaining=Sum('remaining'),
         total_review=Sum('review')
     )
@@ -147,36 +146,46 @@ def register_store(request):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+
+from django.shortcuts import get_object_or_404, render, redirect
+from .models import Store, Stock
+from .utils import save_note_to_cache
+  # Import the helper function
+from django.utils import timezone
+from datetime import date
+
 @login_required
 def add_stock(request, store_id):
     store = get_object_or_404(Store, id=store_id)
-
-    # Get yesterday's stock entry if available, otherwise default to 0
     yesterday_stock = Stock.objects.filter(store=store).order_by('-date').first()
     yesterday_remaining = yesterday_stock.remaining if yesterday_stock else 0
     today = date.today().isoformat()
 
     if request.method == 'POST':
-        # Get values from the submitted form
         form_date = request.POST.get('date')
-
         contact = int(request.POST.get('contact'))
         sold_today = int(request.POST.get('sold_today'))
-        system = int(request.POST.get('system'))  # Convert to int
+        system = int(request.POST.get('system'))
+        entered_remaining = int(request.POST.get('remaining'))
+        note = request.POST.get('note', '')
 
         wehave = yesterday_remaining
-        review = wehave - system  # This is now safe
-        remaining = wehave + contact - sold_today
+        expected_remaining = wehave + contact - sold_today
+        review = (expected_remaining - entered_remaining) + (wehave - system)
 
-        # Save the stock entry
+        # Save the note if present
+        note_text = note.strip()
+        if note_text:
+            save_note_to_cache(note_text, request.user)  # Call the helper function
+
         Stock.objects.create(
             store=store,
             date=form_date,
             wehave=wehave,
-            system=system,
             contact=contact,
             sold_today=sold_today,
-            remaining=remaining,
+            system=system,
+            remaining=entered_remaining,
             review=review
         )
 
@@ -187,6 +196,13 @@ def add_stock(request, store_id):
         'yesterday_remaining': yesterday_remaining,
         'today': today,
     })
+
+
+
+      
+
+
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 @login_required
@@ -241,14 +257,6 @@ def add_user_to_store(request, store_id):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from django.http import HttpResponse
-
-from django.urls import path
-
-urlpatterns = [
-    path('', lambda request: HttpResponse("Hello This is LAXMI MOBILE")),
-    # or point to your home view
-]
 
 
 
@@ -257,6 +265,54 @@ urlpatterns = [
 
 
 
+
+
+from django.core.cache import cache
+import uuid
+from datetime import timedelta
+
+def save_user_note(request):
+    if request.method == 'POST':
+        note_text = request.POST.get('note')
+        user = request.user
+
+        if note_text:
+            key = f"note_{uuid.uuid4()}"
+            note_data = {
+                'user': user.username,
+                'note': note_text,
+            }
+
+            # Save note in cache for 24 hours
+            cache.set(key, note_data, timeout=86400)  # 24 hrs
+
+            # Track all note keys
+            existing_keys = cache.get('note_list') or []
+            existing_keys.append(key)
+            cache.set('note_list', existing_keys, timeout=86400)
+
+
+
+
+from django.core.cache import cache
+from datetime import timedelta
+from django.utils import timezone
+
+
+
+
+def notifications_view(request):
+    note_list = cache.get('note_list', [])
+    notifications = []
+    
+    for note_key in note_list:
+        note_data = cache.get(note_key)
+        if note_data:
+            notifications.append(note_data)
+    
+    return render(request, 'notifications.html', {
+        'notifications': notifications,
+    })
 
 
 

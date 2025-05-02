@@ -1,0 +1,18 @@
+{% extends 'nvgbar.html' %}
+{% block body %}
+<div class="notifications">
+    <h2>Notifications</h2>
+    {% if notifications %}
+        <ul>
+            {% for note in notifications %}
+                <li>
+                    <strong>{{ note.user }}:</strong> {{ note.note }} <br>
+                    <small>{{ note.time }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No new notifications.</p>
+    {% endif %}
+</div>
+{% endblock %}
