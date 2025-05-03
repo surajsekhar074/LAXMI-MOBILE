@@ -30,6 +30,9 @@ class Stock(models.Model):
 
     system = models.IntegerField()
     remaining = models.IntegerField()
+    username = models.CharField(max_length=150, blank=True, null=True)
+
+
 
     review1 = models.IntegerField(default=0)  # abc - system
     review2 = models.IntegerField(default=0)  # abc - remaining

@@ -116,9 +116,14 @@
 
     @media (max-width: 768px) {
         .stock-box {
-            flex: 0 0 40%;
+            flex: 0 0 30%;
         }
     }
+
+    .container-fluid {
+        padding: 8px 6px;
+        }
+    
 
 
 
@@ -170,11 +175,7 @@
             {{ totals.total_wehave|default:0 }}
             <div class="stock-title">Opening Stock</div>
         </div>
-        <div class="stock-box">
-            <i class="fas fa-computer fa-lg mb-2"></i><br>
-            {{ totals.total_system|default:0 }}
-            <div class="stock-title"> system</div>
-        </div>
+        
         <div class="stock-box">
             <i class="fas fa-plus-circle fa-lg mb-2"></i><br>
             {{ totals.total_contact|default:0 }}
@@ -186,6 +187,11 @@
             <div class="stock-title">Sold Stock</div>
         </div>
         <div class="stock-box">
+            <i class="fas fa-computer fa-lg mb-2"></i><br>
+            {{ totals.total_system|default:0 }}
+            <div class="stock-title"> System</div>
+        </div>
+        <div class="stock-box">
             <i class="fas fa-cubes fa-lg mb-2"></i><br>
             {{ totals.total_remaining|default:0 }}
             <div class="stock-title">Physical Stock</div>
@@ -193,13 +199,13 @@
         <div class="stock-box">
             <i class="fas fa-star-half-alt fa-lg mb-2"></i><br>
             {{ totals.total_review1|default:0 }}
-            <div class="stock-title">Different Stock1</div>
+            <div class="stock-title">System Different</div>
         </div>
 
         <div class="stock-box">
             <i class="fas fa-star-half-alt fa-lg mb-2"></i><br>
             {{ totals.total_review2|default:0 }}
-            <div class="stock-title">Different Stock2</div>
+            <div class="stock-title">Physical Different</div>
         </div>
         
     </div>

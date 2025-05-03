@@ -192,8 +192,10 @@ def add_stock(request, store_id):
             sold_today=sold_today,
             system=system,
             remaining=entered_remaining,
+            
             review1=review1,
             review2=review2
+            
         )
 
         return redirect('store_stock_view', store_id=store.id)

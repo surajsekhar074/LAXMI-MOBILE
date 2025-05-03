@@ -33,7 +33,7 @@
 
 
 
-<h2 class="text-center mt-4">{{ store.location }} </h2>
+<h2 class="text-center mt-4">{{ store.name }} </h2>
 
 <div class="container mt-4">
 
@@ -61,10 +61,11 @@
                         <th>Added Stock</th>
                         <th>Sold Stock</th>
                         <th>System</th>
-                        <th>Closing</th>
+                        <th>Physical Stock</th>
                         
-                        <th>different stock1</th>
-                        <th>Different Stock2</th>
+                        <th>System Different</th>
+                        <th>Physical Different</th>
+                        
                         
                     </tr>
                 </thead>
@@ -83,6 +84,7 @@
                             
                             <td>{{ stock.review1 }}</td>
                             <td>{{ stock.review2 }}</td>
+                            
                             
                         </tr>
                     {% endfor %}
