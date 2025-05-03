@@ -41,18 +41,22 @@
                 <label for="sold_today">Sold Stock</label>
             </div>
             <div class="form-floating mb-3">
-                <input type="number" id="system" name="system" class="form-control" oninput="calculateReview()" required>
+                <input type="number" id="system" name="system" class="form-control" required>
                 <label for="system">System</label>
             </div>
 
             
             <div class="form-floating mb-3">
-                <input type="number" id="remaining" name="remaining" class="form-control" required oninput="calculateReview()">
+                <input type="number" id="remaining" name="remaining" class="form-control" required>
                 <label for="remaining">Closing Stock</label>
             </div>
             <div class="form-floating mb-3">
-                <input type="number" id="review" name="review" class="form-control" readonly required>
-                <label for="review">Review</label>
+                <input type="number" id="review1" name="review1" class="form-control" readonly>
+                <label for="review1">Review 1 </label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="number" id="review2" name="review2" class="form-control" readonly>
+                <label for="review2">Review 2 </label>
             </div>
             <div class="form-floating mb-3">
                 <textarea class="form-control" id="note" name="note" placeholder="Describe any issue..."></textarea>
@@ -71,31 +75,37 @@
     </div>
 </div>
 
-<!-- JS: Recalculate remaining -->
+<!-- JS: Calculate Reviews -->
 <script>
-function calculateReview() {
-    const system = parseInt(document.getElementById('system')?.value) || 0;
-    const remaining = parseInt(document.getElementById('remaining')?.value) || 0;
+    function calculateReview() {
+        const wehave = parseInt(document.getElementById('wehave')?.value) || 0;
+        const contact = parseInt(document.getElementById('contact')?.value) || 0;
+        const sold_today = parseInt(document.getElementById('sold_today')?.value) || 0;
+        const system = parseInt(document.getElementById('system')?.value) || 0;
+        const remaining = parseInt(document.getElementById('remaining')?.value) || 0;
 
-    // Calculate the review as system - remaining stock
-    const review = system - remaining;
+        const abc = wehave + contact - sold_today;
 
-    // Set the review value to the form input field
-    document.getElementById('review').value = review;
-}
+        const review1 = abc - system;
+        const review2 = abc - remaining;
 
-window.onload = function () {
-    calculateReview();
-};
+        document.getElementById('review1').value = review1;
+        document.getElementById('review2').value = review2;
+    }
 
+    // Attach only on user input
+    document.getElementById('contact').addEventListener('input', calculateReview);
+    document.getElementById('sold_today').addEventListener('input', calculateReview);
+    document.getElementById('system').addEventListener('input', calculateReview);
+    document.getElementById('remaining').addEventListener('input', calculateReview);
 </script>
+
 
 
 
 <style>
     .container {
         max-width: 600px;
-        height: 100px;
         margin: auto;
     }
 
@@ -103,7 +113,7 @@ window.onload = function () {
         font-family: 'Segoe UI', sans-serif;
         background-color: #f1f4f9;
         color: #333;
-        font-weight: bold;  /* Make all text bold */
+        font-weight: bold;
     }
 
     .card {
@@ -115,13 +125,13 @@ window.onload = function () {
     .form-floating > label {
         font-size: 14px;
         color: #6c757d;
-        font-weight: bold; /* Ensure label text is bold */
+        font-weight: bold;
     }
 
     .form-control {
         border-radius: 10px;
         height: 30px;
-        font-weight: bold;  /* Make input text bold */
+        font-weight: bold;
     }
 
     .form-control:focus {
@@ -132,7 +142,7 @@ window.onload = function () {
     h2 {
         font-weight: 700;
         color: #1e3a8a;
-        text-shadow: 0 0 8px rgba(30, 58, 138, 0.6); /* Glowing effect */
+        text-shadow: 0 0 8px rgba(30, 58, 138, 0.6);
     }
 
     .btn-gradient {

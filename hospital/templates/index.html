@@ -125,8 +125,22 @@
 </style>
 
 
+
+
+
 <div class="container-fluid">
-    <h2>🧾 PREOWN REPORTS </h2>
+    <h2>🧾 PREOWNED REPORTS </h2>
+
+
+
+    <div style="position: absolute; top: 20px; left: 20px;">
+        <img src="{% static 'images/logo.png' %}" alt="Logo" style="height: 60px;">
+    </div>
+
+
+
+   
+    
 
    
 
@@ -148,13 +162,7 @@
             <button type="submit" class="btn w-100">Filter</button>
         </div>
     </form>
-    {% if request.GET.store_id %}
-    <form method="GET" action="" class="row mt-4">
-        <div class="col-md-12">
-            <button type="submit" name="action" value="total" class="btn w-100">Total</button>
-        </div>
-    </form>
-     {% endif %}
+
 
     <div class="summary-boxes">
         <div class="stock-box">
@@ -184,9 +192,16 @@
         </div>
         <div class="stock-box">
             <i class="fas fa-star-half-alt fa-lg mb-2"></i><br>
-            {{ totals.total_review|default:0 }}
-            <div class="stock-title">Different Stock</div>
+            {{ totals.total_review1|default:0 }}
+            <div class="stock-title">Different Stock1</div>
         </div>
+
+        <div class="stock-box">
+            <i class="fas fa-star-half-alt fa-lg mb-2"></i><br>
+            {{ totals.total_review2|default:0 }}
+            <div class="stock-title">Different Stock2</div>
+        </div>
+        
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -223,9 +238,13 @@
     glowRemaining.addColorStop(0, '#6ee7b7');
     glowRemaining.addColorStop(1, '#10b981');
 
-    const glowDifferent = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-    glowDifferent.addColorStop(0, '#fde68a');
-    glowDifferent.addColorStop(1, '#f59e0b');
+    const glowReview1 = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+    glowReview1.addColorStop(0, '#fde68a');
+    glowReview1.addColorStop(1, '#f59e0b');
+
+    const glowReview2 = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+    glowReview2.addColorStop(0, '#fcd34d');
+    glowReview2.addColorStop(1, '#facc15');
 
     const glowSystem = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
     glowSystem.addColorStop(0, '#fca5a5');
@@ -234,7 +253,7 @@
     new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Opening', 'Added', 'Sold', 'Remaining', 'Different', 'System'],
+            labels: ['Opening', 'Added', 'Sold', 'Remaining', 'Review 1', 'Review 2', 'System'],
             datasets: [{
                 label: 'Stock',
                 data: [
@@ -242,7 +261,8 @@
                     {{ totals.total_contact|default:0 }},
                     {{ totals.total_sold|default:0 }},
                     {{ totals.total_remaining|default:0 }},
-                    {{ totals.total_review|default:0 }},
+                    {{ totals.total_review1|default:0 }},
+                    {{ totals.total_review2|default:0 }},
                     {{ totals.total_system|default:0 }}
                 ],
                 backgroundColor: [
@@ -250,10 +270,11 @@
                     glowAdded,
                     glowSold,
                     glowRemaining,
-                    glowDifferent,
+                    glowReview1,
+                    glowReview2,
                     glowSystem
                 ],
-                borderWidth: 0,  // No border glow
+                borderWidth: 0,
                 hoverOffset: 10
             }]
         },
@@ -276,13 +297,6 @@
         }
     });
 </script>
-
-
-
-
-
-
-
 
 
 {% endblock %}

@@ -22,6 +22,8 @@ from django.http import HttpResponse
 from django.urls import path
 
 from django.contrib.auth import views as auth_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 
@@ -68,7 +70,7 @@ urlpatterns = [
     
     path('store/<int:store_id>/add_stock/', add_stock, name='add_stock'),
     
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     
 
 

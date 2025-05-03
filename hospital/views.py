@@ -106,7 +106,8 @@ def index(request):
         total_system=Sum('system'),
         total_contact=Sum('contact'),  total_sold=Sum('sold_today'),
         total_remaining=Sum('remaining'),
-        total_review=Sum('review')
+        total_review1=Sum('review1'),
+        total_review2=Sum('review2')
     )
 
     context = {
@@ -149,8 +150,7 @@ def register_store(request):
 
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Store, Stock
-from .utils import save_note_to_cache  # Import the helper function
-from django.utils import timezone
+from .utils import save_note_to_cache
 from datetime import date
 from django.contrib.auth.decorators import login_required
 
@@ -165,19 +165,25 @@ def add_stock(request, store_id):
         form_date = request.POST.get('date')
         contact = int(request.POST.get('contact'))
         sold_today = int(request.POST.get('sold_today'))
-        system = int(request.POST.get('system'))
         entered_remaining = int(request.POST.get('remaining'))
-        note = request.POST.get('note', '')
+        system = int(request.POST.get('system'))
+        note = request.POST.get('note', '').strip()
 
-        # Use yesterday's remaining stock value as wehave
+        # Use yesterday's remaining as opening stock
         wehave = yesterday_remaining
 
-        # Save the note if present
-        note_text = note.strip()
-        if note_text:
-            save_note_to_cache(note_text, request.user)  # Call the helper function
+        # Calculate abc
+        abc = wehave + contact - sold_today
 
-        # Create new stock record with review calculation based on system and remaining stock
+        # Calculate review1 and review2
+        review1 = abc - system
+        review2 = abc - entered_remaining
+
+        # Save note if present
+        if note:
+            save_note_to_cache(note, request.user)
+
+        # Save the stock entry with both review values
         Stock.objects.create(
             store=store,
             date=form_date,
@@ -186,7 +192,8 @@ def add_stock(request, store_id):
             sold_today=sold_today,
             system=system,
             remaining=entered_remaining,
-            review=system - entered_remaining  # Calculate review directly based on system and remaining
+            review1=review1,
+            review2=review2
         )
 
         return redirect('store_stock_view', store_id=store.id)
@@ -196,6 +203,9 @@ def add_stock(request, store_id):
         'yesterday_remaining': yesterday_remaining,
         'today': today,
     })
+
+
+
 
 
 

@@ -16,35 +16,27 @@ class Store(models.Model):
         return self.name
 
 
+
+
+
+
+
 class Stock(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
+    store = models.ForeignKey('Store', on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateTimeField(null=True, blank=True)
     wehave = models.IntegerField(default=0)
+    contact = models.IntegerField(default=0)
+    sold_today = models.IntegerField(default=0)
+
     system = models.IntegerField()
-    contact = models.IntegerField()  # items added today
-    sold_today = models.IntegerField(blank=True, null=True)
-
     remaining = models.IntegerField()
-    review = models.IntegerField()  # calculated as system - remaining stock
 
-    def save(self, *args, **kwargs):
-        # Ensure the fields are integers (convert from strings if needed)
-        self.wehave = int(self.wehave) if not isinstance(self.wehave, int) else self.wehave
-        self.contact = int(self.contact) if not isinstance(self.contact, int) else self.contact
-        self.sold_today = int(self.sold_today) if self.sold_today is not None and not isinstance(self.sold_today, int) else self.sold_today
-
-        # Calculate review as system - remaining (no need to calculate remaining here)
-        self.system = int(self.system) if self.system is not None else 0
-        self.review = self.system - self.remaining  # This is still calculated as system - remaining
-
-        # Save the instance
-        super(Stock, self).save(*args, **kwargs)
+    review1 = models.IntegerField(default=0)  # abc - system
+    review2 = models.IntegerField(default=0)  # abc - remaining
 
     def __str__(self):
         return f"Stock on {self.date}"
 
-
-    
 
     
 
