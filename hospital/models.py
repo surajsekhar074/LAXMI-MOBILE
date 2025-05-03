@@ -30,7 +30,7 @@ class Stock(models.Model):
 
     system = models.IntegerField()
     remaining = models.IntegerField()
-    username = models.CharField(max_length=150, blank=True, null=True)
+    
 
 
 
