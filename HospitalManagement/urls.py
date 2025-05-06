@@ -70,7 +70,7 @@ urlpatterns = [
     
     path('store/<int:store_id>/add_stock/', add_stock, name='add_stock'),
     
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] 
     
 
 
