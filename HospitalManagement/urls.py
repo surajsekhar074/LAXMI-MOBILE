@@ -55,9 +55,14 @@ urlpatterns = [
     path('', lambda request: HttpResponse("Hello This is LAXMI MOBILE")),
     
     path('login/', custom_login_view, name='login'),
-     path('notifications/', notifications_view, name='notifications_view'),
+    path('notifications/', notifications_view, name='notifications_view'),
+    path('all-users/', all_users_view, name='all_users'),
+
     
     path('store/<int:store_id>/admin_add_user/', add_user_to_store, name='admin_add_user'),
+    path('reset-password/<int:user_id>/', reset_password_view, name='reset_password'),
+    path('edit-user/<int:user_id>/', edit_user_view, name='edit_user'),
+    path('delete-user/<int:user_id>/', delete_user_view, name='delete_user'),
 
     
 

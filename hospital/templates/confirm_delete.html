@@ -1,0 +1,17 @@
+{% extends 'nvgbar.html' %}
+
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="card p-4 shadow-lg" style="max-width: 400px; width: 100%;">
+        <h3 class="text-center mb-4">Delete User Confirmation</h3>
+        <p class="text-center">Are you sure you want to delete <strong>{{ user.username }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-around mt-4">
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a href="{% url 'all_users' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

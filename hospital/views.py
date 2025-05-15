@@ -24,6 +24,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import IntegrityError
 from datetime import date
+from django.contrib.auth.models import User
+# assuming you link users to stores
+
+
+
 
 
 # Create your views here.
@@ -306,6 +311,9 @@ def save_user_note(request):
             cache.set('note_list', existing_keys, timeout=86400)
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 
 
 from django.core.cache import cache
@@ -327,6 +335,77 @@ def notifications_view(request):
     return render(request, 'notifications.html', {
         'notifications': notifications,
     })
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+from django.contrib.auth.models import User
+from django.shortcuts import render
+from django.contrib.auth.decorators import user_passes_test
+
+@user_passes_test(lambda u: u.is_superuser)
+def all_users_view(request):
+    users = User.objects.all().select_related('assigned_store')
+    return render(request, 'all_users.html', {'users': users})
+
+
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import WorkerProfile
+
+@login_required
+def all_users_view(request):
+    users = WorkerProfile.objects.select_related('user', 'store').all()
+    return render(request, 'all_users.html', {'users': users}) 
+
+
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
+from .models import WorkerProfile, Store
+from django.contrib import messages
+
+def all_users_view(request):
+    users = WorkerProfile.objects.select_related('user', 'store')
+    return render(request, 'all_users.html', {'users': users})
+
+def reset_password_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        user.set_password(new_password)
+        user.save()
+        messages.success(request, f"Password reset for {user.username}")
+        return redirect('all_users')
+    return render(request, 'reset_password.html', {'user': user})
+
+def edit_user_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(WorkerProfile, user=user)
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        store_id = request.POST.get('store')
+        user.username = username
+        user.save()
+        profile.store = Store.objects.get(id=store_id)
+        profile.save()
+        messages.success(request, "User updated successfully.")
+        return redirect('all_users')
+
+    stores = Store.objects.all()
+    return render(request, 'edit_user.html', {'user': user, 'profile': profile, 'stores': stores})
+
+def delete_user_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, "User deleted successfully.")
+        return redirect('all_users')
+    return render(request, 'confirm_delete.html', {'user': user})
 
 
 
