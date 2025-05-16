@@ -87,12 +87,36 @@ WSGI_APPLICATION = 'HospitalManagement.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
+
+import pymysql
+pymysql.install_as_MySQLdb()
+
+from pathlib import Path
+# other imports...
+
+
+
+
+
+
+
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mydjango_db',
+        'USER': 'root',
+        'PASSWORD': 'Sonu@098',
+        'HOST': 'localhost',
+        'PORT': '3307',
     }
 }
+
+
+
+
 
 
 # Password validation
