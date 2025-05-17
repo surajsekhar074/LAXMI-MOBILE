@@ -89,12 +89,6 @@ WSGI_APPLICATION = 'HospitalManagement.wsgi.application'
 
 
 
-import pymysql
-pymysql.install_as_MySQLdb()
-
-from pathlib import Path
-# other imports...
-
 
 
 
@@ -105,14 +99,11 @@ from pathlib import Path
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mydjango_db',
-        'USER': 'root',
-        'PASSWORD': 'Sonu@098',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # Or os.path.join(BASE_DIR, 'db.sqlite3') if not using pathlib
     }
 }
+
 
 
 
