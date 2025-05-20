@@ -21,6 +21,7 @@ from django.http import HttpResponse
 from hospital.views import create_superuser
 
 
+
 from django.urls import path
 
 from django.contrib.auth import views as auth_views
