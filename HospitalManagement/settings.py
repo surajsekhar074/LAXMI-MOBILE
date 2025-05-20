@@ -170,7 +170,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 from django.apps import AppConfig
 import os
 
-class YourAppConfig(AppConfig):
+
+class HospitalConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'hospital'  # replace with your actual app name
 
