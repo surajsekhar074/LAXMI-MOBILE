@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path
 from hospital.views import *
 from django.http import HttpResponse
+from hospital.views import create_superuser
+
 
 from django.urls import path
 
