@@ -408,17 +408,16 @@ def delete_user_view(request, user_id):
     return render(request, 'confirm_delete.html', {'user': user})
 
 
-
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 
 def create_superuser(request):
     User = get_user_model()
     if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@example.com', '@2025S')
-        return HttpResponse("Superuser created successfully!")
-    else:
-        return HttpResponse("Superuser already exists.")
+        User.objects.create_superuser(username='admin', email='admin@example.com', password='@2025')
+        return HttpResponse("✅ Superuser created successfully!")
+    return HttpResponse("ℹ️ Superuser already exists.")
+
 
 
 
