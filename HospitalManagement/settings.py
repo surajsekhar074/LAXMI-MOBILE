@@ -35,7 +35,7 @@ ALLOWED_HOSTS = ['laxmi-mobile-stock.onrender.com',
 
 INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
-    'hospital',
+    'hospital.apps.HospitalConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -167,14 +167,20 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
-# --- TEMP: Auto create superuser on deploy ---
+from django.apps import AppConfig
 import os
-from django.contrib.auth import get_user_model
 
-if os.environ.get('AUTO_CREATE_SUPERUSER') == 'True':
-    User = get_user_model()
-    if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'sekharsuraj074@gmail.com', '@2025')
+class YourAppConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'hospital'  # replace with your actual app name
+
+    def ready(self):
+        if os.environ.get('AUTO_CREATE_SUPERUSER') == 'True':
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            if not User.objects.filter(username='admin').exists():
+                User.objects.create_superuser('admin', 'admin@example.com', '@2025S')
+
 
 
 
