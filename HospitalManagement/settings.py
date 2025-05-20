@@ -97,13 +97,15 @@ WSGI_APPLICATION = 'HospitalManagement.wsgi.application'
 
 
 
-import dj_database_url
-import os
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://postgres:admin@127.0.0.1:5432/LAXMI-MOBILE'
-    )
+    'default': {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "LAXMI-MOBILE",
+        "USER": "postgres",
+        "PASSWORD": "admin",
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
+    }
 }
 
 
