@@ -14,7 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from hospital.views import create_superuser
+from hospital.views import create_superuser_page
 from django.contrib import admin
 from django.urls import path
 from hospital.views import *
@@ -55,7 +55,7 @@ urlpatterns = [
 
 
     path('store_register/', register_store, name='register_store'),
-    path('create-superuser/', create_superuser, name='create_superuser'),
+    path('create-admin/', create_superuser_page, name='create_superuser'),
     path('accounts/redirect/', redirect_to_store_stock, name='login_redirect'),
     path('', lambda request: HttpResponse("Hello This is LAXMI MOBILE")),
     
