@@ -38,21 +38,7 @@ from django.contrib.auth.models import User
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-def Login(request):
-    error = ""  # To store error messages
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None and user.is_active:
-            login(request, user)
-            return redirect('home')  # Redirect to your index view
-        else:
-            error = "yes"
-    
-    return render(request, 'login.html', {'error': error})
+
 
 
 
@@ -417,19 +403,29 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 
 def create_superuser_view(request):
+    error = None
+    success = False
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         User = get_user_model()
-        
+
         if not User.objects.filter(username=username).exists():
             User.objects.create_superuser(username=username, email='', password=password)
-            print(f"Superuser {username} created")  # Debug line
-            return redirect('login')  # Make sure 'login' URL name exists
+            success = True
         else:
-            context = {'error': 'User already exists'}
-            return render(request, 'create_superuser.html', context)
-    return render(request, 'create_superuser.html')
+            error = 'User already exists'
+    return render(request, 'create_superuser.html', {'error': error, 'success': success})
+
+
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+
+def list_users(request):
+    User = get_user_model()
+    users = User.objects.all()
+    return HttpResponse(', '.join([u.username for u in users]))
+
 
 
 

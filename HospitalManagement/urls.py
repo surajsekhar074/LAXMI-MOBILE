@@ -44,7 +44,7 @@ urlpatterns = [
     
     
     path('',index,name='home'),
-    path('admin_login/', Login,name='login'),
+   
     path('logout/', logout_Admin,name='logout'),
     path('store/<int:store_id>/stock/', store_stock_view, name='store_stock_view'),
     

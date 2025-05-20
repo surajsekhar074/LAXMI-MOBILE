@@ -1,19 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Admin</title>
-</head>
-<body>
-    <h2>Create Superuser</h2>
-    <form method="POST">
-        {% csrf_token %}
-        <label>Username:</label><br>
-        <input type="text" name="username" required><br><br>
+{% extends 'nvgbar.html' %}
+{% block body %}
+<div class="container" style="max-width: 400px; margin-top: 50px;">
+    <div class="card p-4 shadow">
+        <h2>Create Superuser</h2>
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        {% if success %}
+            <div class="alert alert-success">Superuser created successfully! <a href="{% url 'login' %}">Login</a></div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" required>
 
-        <label>Password:</label><br>
-        <input type="password" name="password" required><br><br>
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" required>
 
-        <button type="submit">Create Admin</button>
-    </form>
-</body>
-</html>
+            <br>
+            <button type="submit" class="btn btn-primary form-control">Create</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
