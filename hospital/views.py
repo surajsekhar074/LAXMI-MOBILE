@@ -421,9 +421,11 @@ def create_superuser_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         User = get_user_model()
+        
         if not User.objects.filter(username=username).exists():
             User.objects.create_superuser(username=username, email='', password=password)
-            return redirect('login')  # or wherever you want after creation
+            print(f"Superuser {username} created")  # Debug line
+            return redirect('login')  # Make sure 'login' URL name exists
         else:
             context = {'error': 'User already exists'}
             return render(request, 'create_superuser.html', context)
