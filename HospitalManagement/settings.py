@@ -167,4 +167,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
+# --- TEMP: Auto create superuser on deploy ---
+import os
+from django.contrib.auth import get_user_model
+
+if os.environ.get('AUTO_CREATE_SUPERUSER') == 'True':
+    User = get_user_model()
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', 'sekharsuraj074@gmail.com', '@2025')
+
+
 
