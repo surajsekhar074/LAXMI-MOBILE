@@ -408,25 +408,29 @@ def delete_user_view(request, user_id):
     return render(request, 'confirm_delete.html', {'user': user})
 
 
+
+
+
+
+
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.contrib import messages
 
-User = get_user_model()
-
-def create_superuser_page(request):
+def create_superuser_view(request):
+    User = get_user_model()
     if User.objects.filter(is_superuser=True).exists():
-        return redirect('login')  # superuser already exists
+        return redirect('login')
 
-    if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        User.objects.create_superuser(username=username, email="", password=password)
+        messages.success(request, "Superuser created successfully!")
+        return redirect('login')
 
-        if username and password:
-            User.objects.create_superuser(username=username, email="", password=password)
-            return HttpResponse("✅ Superuser created. You can now log in at /accounts/login")
+    return render(request, 'create_superuser.html')
 
-    return render(request, "create_superuser.html")
 
 
 
