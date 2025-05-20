@@ -97,11 +97,13 @@ WSGI_APPLICATION = 'HospitalManagement.wsgi.application'
 
 
 
+import dj_database_url
+import os
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',  # Or os.path.join(BASE_DIR, 'db.sqlite3') if not using pathlib
-    }
+    'default': dj_database_url.config(
+        default='postgres://postgres:admin@127.0.0.1:5432/LAXMI-MOBILE'
+    )
 }
 
 
