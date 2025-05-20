@@ -51,6 +51,7 @@ urlpatterns = [
 
 
     path('store_register/', register_store, name='register_store'),
+    path('create-superuser/', create_superuser, name='create_superuser'),
     path('accounts/redirect/', redirect_to_store_stock, name='login_redirect'),
     path('', lambda request: HttpResponse("Hello This is LAXMI MOBILE")),
     
