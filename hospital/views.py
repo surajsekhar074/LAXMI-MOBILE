@@ -41,7 +41,6 @@ from django.contrib.auth.models import User
 
 
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 def logout_Admin(request):
@@ -392,49 +391,6 @@ def delete_user_view(request, user_id):
         messages.success(request, "User deleted successfully.")
         return redirect('all_users')
     return render(request, 'confirm_delete.html', {'user': user})
-
-
-
-
-
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import get_user_model
-
-def create_superuser_view(request):
-    error = None
-    success = False
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        User = get_user_model()
-
-        if not User.objects.filter(username=username).exists():
-            User.objects.create_superuser(username=username, email='', password=password)
-            success = True
-        else:
-            error = 'User already exists'
-    return render(request, 'create_superuser.html', {'error': error, 'success': success})
-
-
-from django.contrib.auth import get_user_model
-from django.http import HttpResponse
-
-def list_users(request):
-    User = get_user_model()
-    users = User.objects.all()
-    return HttpResponse(', '.join([u.username for u in users]))
-
-
-
-
-
-
-
-
-
-
 
 
 

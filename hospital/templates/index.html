@@ -1,6 +1,7 @@
 {% extends 'nvgbar.html' %}
 {% load static %}
 {% block body %}
+{% if request.user.is_staff %}
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -307,6 +308,7 @@
         }
     });
 </script>
+{% endif %}
 
 
 {% endblock %}
