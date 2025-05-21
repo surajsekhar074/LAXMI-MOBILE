@@ -84,7 +84,7 @@ def index(request):
     if not user.is_staff:
         # If user is NOT staff (normal user), redirect them somewhere else,
         # e.g., their store stock page.
-        return redirect('staff_store_stock')  # replace with your staff stock view URL name
+        return redirect('store_stock_view')  # replace with your staff stock view URL name
 
     # If user is admin (is_staff True), show admin index page:
     stores = Store.objects.all()
