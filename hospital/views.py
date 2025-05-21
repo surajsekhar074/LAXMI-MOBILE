@@ -74,19 +74,8 @@ def custom_login_view(request):
    
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
-
 @login_required
 def index(request):
-    user = request.user
-    if not user.is_staff:
-        # If user is NOT staff (normal user), redirect them somewhere else,
-        # e.g., their store stock page.
-        return redirect('store_stock_view')  # replace with your staff stock view URL name
-
-    # If user is admin (is_staff True), show admin index page:
     stores = Store.objects.all()
 
     store_id = request.GET.get('store_id')
@@ -96,16 +85,16 @@ def index(request):
 
     if store_id:
         stocks = stocks.filter(store_id=store_id)
-
+    
     if selected_date:
         selected_date = parse_date(selected_date)
         stocks = stocks.filter(date=selected_date)
 
+    # Now do the aggregation based on the filtered stocks
     totals = stocks.aggregate(
         total_wehave=Sum('wehave'),
         total_system=Sum('system'),
-        total_contact=Sum('contact'),
-        total_sold=Sum('sold_today'),
+        total_contact=Sum('contact'),  total_sold=Sum('sold_today'),
         total_remaining=Sum('remaining'),
         total_review1=Sum('review1'),
         total_review2=Sum('review2')
@@ -116,7 +105,6 @@ def index(request):
         'totals': totals,
     }
     return render(request, 'index.html', context)
-
 
 
 
