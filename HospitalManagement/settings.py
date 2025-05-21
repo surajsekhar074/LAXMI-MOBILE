@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
+import dj_database_url
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,22 +23,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9etypjz6%hz29_w@2+o_+mwr8xndx!s$i4vh_gslaqc_zjv#7w'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+from decouple import config
 
-ALLOWED_HOSTS = ['laxmi-mobile-stock.onrender.com',
-                 '127.0.0.1',
-                 'localhost',
-    ]
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1').split(',')
+
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
-    'hospital.apps.HospitalConfig',
+    'hospital',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -94,17 +96,18 @@ WSGI_APPLICATION = 'HospitalManagement.wsgi.application'
 
 
 
-
-
-
-import os
+from decouple import config
 import dj_database_url
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('postgresql://laxmi_mobile_user:nFkMtEfaffEGM0o6E4wHOLiVsZYhEi4D@dpg-d0m5fjodl3ps73c1pncg-a/laxmi_mobileL')
-    )
+    'default': dj_database_url.parse(config('DATABASE_URL'), ssl_require=True),
 }
+
+
+
+
+
+
 
 
 
@@ -165,23 +168,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
-from django.apps import AppConfig
-import os
-
-
-class HospitalConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'hospital'  # replace with your actual app name
-
-    def ready(self):
-        if os.environ.get('AUTO_CREATE_SUPERUSER') == 'True':
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
-            if not User.objects.filter(username='admin').exists():
-                User.objects.create_superuser('admin', 'admin@example.com', '@2025S')
-
 
 
 
