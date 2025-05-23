@@ -21,12 +21,15 @@
                 <label for="date">Date</label>
             </div>
             
-            {% if request.user.is_staff %}
-            <div class="form-floating mb-3">
-                <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" oninput="calculateReview()" readonly required>
-                <label for="wehave">Opening Stock</label>
-            </div>
-            {% endif %}
+           {% if request.user.is_staff %}
+<div class="form-floating mb-3">
+    <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" oninput="calculateReview()" readonly required>
+    <label for="wehave">Opening Stock</label>
+</div>
+{% else %}
+<input type="hidden" id="wehave" name="wehave" value="{{ yesterday_remaining }}">
+{% endif %}
+
 
             
           
