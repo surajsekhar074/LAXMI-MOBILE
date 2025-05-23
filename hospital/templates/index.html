@@ -150,7 +150,7 @@
                 <option value="">Select Store</option>
                 {% for store in stores %}
                     <option value="{{ store.id }}" {% if request.GET.store_id == store.id|stringformat:"s" %}selected{% endif %}>
-                        {{ store.name }}
+                        {{ store.location }}
                     </option>
                 {% endfor %}
             </select>

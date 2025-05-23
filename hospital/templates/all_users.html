@@ -17,7 +17,7 @@
                 {% for profile in users %}
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 text-gray-800">{{ profile.user.username }}</td>
-                    <td class="px-6 py-4 text-gray-800">{{ profile.store.name }}</td>
+                    <td class="px-6 py-4 text-gray-800">{{ profile.store.location }}</td>
                     <td class="px-6 py-4">
                         <a href="{% url 'reset_password' profile.user.id %}" class="text-blue-600 hover:underline mr-4">🔁 Reset Password</a>
                         <a href="{% url 'edit_user' profile.user.id %}" class="text-green-600 hover:underline mr-4">✏️ Edit</a>

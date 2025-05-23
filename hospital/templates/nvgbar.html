@@ -156,7 +156,7 @@
       </button>
       <div class="dropdown-menu" aria-labelledby="storeDropdownMenu">
         {% for store in stores %}
-          <a class="dropdown-item" href="{% url 'store_stock_view' store.id %}">{{ store.name }}</a>
+          <a class="dropdown-item" href="{% url 'store_stock_view' store.id %}">{{ store.location }}</a>
         {% empty %}
           <span class="dropdown-item text-muted">No stores available</span>
         {% endfor %}
@@ -199,7 +199,7 @@
           {% for store in stores %}
           <li class="nav-item">
             <a class="nav-link" href="{% url 'admin_add_user' store.id %}">
-              <i class="fas fa-store-alt"></i> {{ store.name }}
+              <i class="fas fa-store-alt"></i> {{ store.location }}
             </a>
           </li>
           {% endfor %}
