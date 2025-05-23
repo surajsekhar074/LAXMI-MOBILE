@@ -205,12 +205,7 @@
         
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<div class="d-flex justify-content-center mt-5">
-    <div style="width: 300px; height: 300px;">
-        <canvas id="stockChart"></canvas>
-    </div>
-</div>
+
 
 
 <script>
@@ -219,85 +214,196 @@
         dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap;">
+  <canvas id="stockChart" width="300" height="300"></canvas>
+  <canvas id="stockBarChart" width="350" height="300"></canvas>
+</div>
+
+<style>
+  #stockChart, #stockBarChart {
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+    border-radius: 10px;
+    background: #fff;
+  }
+</style>
+
 <script>
-    const ctx = document.getElementById('stockChart').getContext('2d');
+  const ctx = document.getElementById('stockChart').getContext('2d');
+  const ctxBar = document.getElementById('stockBarChart').getContext('2d');
 
-    // Simulated glowing gradients per slice
-    const glowOpening = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-    glowOpening.addColorStop(0, '#a5b4fc');
-    glowOpening.addColorStop(1, '#6366f1');
+  // Shadow plugin for doughnut chart (3D shadow effect)
+  const shadowPlugin = {
+    id: 'shadowPlugin',
+    beforeDraw(chart) {
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+      ctx.shadowBlur = 15;
+      ctx.shadowOffsetX = 5;
+      ctx.shadowOffsetY = 5;
+    },
+    afterDraw(chart) {
+      chart.ctx.restore();
+    }
+  };
 
-    const glowAdded = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-    glowAdded.addColorStop(0, '#d8b4fe');
-    glowAdded.addColorStop(1, '#8b5cf6');
+  // Doughnut chart gradients
+  const glowOpening = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+  glowOpening.addColorStop(0, '#a5b4fc');
+  glowOpening.addColorStop(1, '#6366f1');
 
-    const glowSold = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-    glowSold.addColorStop(0, '#f9a8d4');
-    glowSold.addColorStop(1, '#ec4899');
+  const glowAdded = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+  glowAdded.addColorStop(0, '#d8b4fe');
+  glowAdded.addColorStop(1, '#8b5cf6');
 
-    const glowRemaining = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-    glowRemaining.addColorStop(0, '#6ee7b7');
-    glowRemaining.addColorStop(1, '#10b981');
+  const glowSold = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+  glowSold.addColorStop(0, '#f9a8d4');
+  glowSold.addColorStop(1, '#ec4899');
 
-    const glowReview1 = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-    glowReview1.addColorStop(0, '#fde68a');
-    glowReview1.addColorStop(1, '#f59e0b');
+  const glowRemaining = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+  glowRemaining.addColorStop(0, '#6ee7b7');
+  glowRemaining.addColorStop(1, '#10b981');
 
-    const glowReview2 = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-    glowReview2.addColorStop(0, '#fcd34d');
-    glowReview2.addColorStop(1, '#facc15');
+  const glowReview1 = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+  glowReview1.addColorStop(0, '#fde68a');
+  glowReview1.addColorStop(1, '#f59e0b');
 
-    const glowSystem = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
-    glowSystem.addColorStop(0, '#fca5a5');
-    glowSystem.addColorStop(1, '#ef4444');
+  const glowReview2 = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+  glowReview2.addColorStop(0, '#fcd34d');
+  glowReview2.addColorStop(1, '#facc15');
 
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Opening', 'Added', 'Sold', 'Physical', 'Different 1', 'Different 2', 'System'],
-            datasets: [{
-                label: 'Stock',
-                data: [
-                    {{ totals.total_wehave|default:0 }},
-                    {{ totals.total_contact|default:0 }},
-                    {{ totals.total_sold|default:0 }},
-                    {{ totals.total_remaining|default:0 }},
-                    {{ totals.total_review1|default:0 }},
-                    {{ totals.total_review2|default:0 }},
-                    {{ totals.total_system|default:0 }}
-                ],
-                backgroundColor: [
-                    glowOpening,
-                    glowAdded,
-                    glowSold,
-                    glowRemaining,
-                    glowReview1,
-                    glowReview2,
-                    glowSystem
-                ],
-                borderWidth: 0,
-                hoverOffset: 10
-            }]
-        },
-        options: {
-            responsive: true,
-            cutout: '60%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 14,
-                        padding: 20
-                    }
-                }
-            },
-            animation: {
-                animateRotate: true,
-                animateScale: true
-            }
+  const glowSystem = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+  glowSystem.addColorStop(0, '#fca5a5');
+  glowSystem.addColorStop(1, '#ef4444');
+
+  // Doughnut Chart
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Opening', 'Added', 'Sold', 'Physical', 'Different 1', 'Different 2', 'System'],
+      datasets: [{
+        label: 'Stock',
+        data: [
+          {{ totals.total_wehave|default:0 }},
+          {{ totals.total_contact|default:0 }},
+          {{ totals.total_sold|default:0 }},
+          {{ totals.total_remaining|default:0 }},
+          {{ totals.total_review1|default:0 }},
+          {{ totals.total_review2|default:0 }},
+          {{ totals.total_system|default:0 }}
+        ],
+        backgroundColor: [
+          glowOpening,
+          glowAdded,
+          glowSold,
+          glowRemaining,
+          glowReview1,
+          glowReview2,
+          glowSystem
+        ],
+        borderWidth: 0,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: false,
+      cutout: '60%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 14,
+            padding: 20
+          }
         }
-    });
+      },
+      animation: {
+        animateRotate: true,
+        animateScale: true
+      }
+    },
+    plugins: [shadowPlugin]
+  });
+
+  // Multi-colored bar gradients (matching doughnut colors)
+  const barGlowOpening = ctxBar.createLinearGradient(0, 0, 0, 280);
+  barGlowOpening.addColorStop(0, '#a5b4fc');
+  barGlowOpening.addColorStop(1, '#6366f1');
+
+  const barGlowAdded = ctxBar.createLinearGradient(0, 0, 0, 280);
+  barGlowAdded.addColorStop(0, '#d8b4fe');
+  barGlowAdded.addColorStop(1, '#8b5cf6');
+
+  const barGlowSold = ctxBar.createLinearGradient(0, 0, 0, 280);
+  barGlowSold.addColorStop(0, '#f9a8d4');
+  barGlowSold.addColorStop(1, '#ec4899');
+
+  const barGlowRemaining = ctxBar.createLinearGradient(0, 0, 0, 280);
+  barGlowRemaining.addColorStop(0, '#6ee7b7');
+  barGlowRemaining.addColorStop(1, '#10b981');
+
+  const barGlowReview1 = ctxBar.createLinearGradient(0, 0, 0, 280);
+  barGlowReview1.addColorStop(0, '#fde68a');
+  barGlowReview1.addColorStop(1, '#f59e0b');
+
+  const barGlowReview2 = ctxBar.createLinearGradient(0, 0, 0, 280);
+  barGlowReview2.addColorStop(0, '#fcd34d');
+  barGlowReview2.addColorStop(1, '#facc15');
+
+  const barGlowSystem = ctxBar.createLinearGradient(0, 0, 0, 280);
+  barGlowSystem.addColorStop(0, '#fca5a5');
+  barGlowSystem.addColorStop(1, '#ef4444');
+
+  // Bar Chart
+  new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: ['Opening', 'Added', 'Sold', 'Physical', 'Different 1', 'Different 2', 'System'],
+      datasets: [{
+        label: 'Stock',
+        data: [
+          {{ totals.total_wehave|default:0 }},
+          {{ totals.total_contact|default:0 }},
+          {{ totals.total_sold|default:0 }},
+          {{ totals.total_remaining|default:0 }},
+          {{ totals.total_review1|default:0 }},
+          {{ totals.total_review2|default:0 }},
+          {{ totals.total_system|default:0 }}
+        ],
+        backgroundColor: [
+          barGlowOpening,
+          barGlowAdded,
+          barGlowSold,
+          barGlowRemaining,
+          barGlowReview1,
+          barGlowReview2,
+          barGlowSystem
+        ],
+        borderColor: '#4c1d95',
+        borderWidth: 1,
+        hoverBorderColor: '#5b21b6',
+        hoverBackgroundColor: '#6d28d9'
+      }]
+    },
+    options: {
+      responsive: false,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top'
+        }
+      }
+    }
+  });
 </script>
+
+
 {% endif %}
 
 
