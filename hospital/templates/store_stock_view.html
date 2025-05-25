@@ -1,12 +1,16 @@
 {% extends 'nvgbar.html' %}
 {% block body %}
+
 {% if request.user.is_staff %}
 <div class="mt-3 d-flex justify-content-end">
     <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
 </div>
 {% endif %}
 
-
+<!-- Bootstrap CSS & JS (Latest stable 5.3.x) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
 <style>
     .navbar-nav .dropdown-menu {
@@ -22,85 +26,13 @@
         background-color: #e0e7ff;
         color: #4f46e5;
     }
-    </style>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
-    
 
+    h2 {
+        font-weight: bold;
+        color: #2575fc;
+        text-shadow: 0 0 10px rgba(37, 117, 252, 0.7);
+    }
 
-
-
-
-
-<h2 class="text-center mt-4">{{ store.location }} </h2>
-
-<div class="container mt-4">
-
-    
-    
-
-    <!-- Add Stock Button -->
-    <div class="text-end mb-3">
-        <a href="{% url 'add_stock' store.id %}" class="btn btn-success modern-button">Reporting</a>
-    </div>
-    <div class="mb-3">
-        <input type="text" id="searchInput" class="form-control" placeholder="Search stock records..." onkeyup="searchTable()">
-    </div>
-
-    {% if stock_records %}
-        <div class="table-responsive">
-            <table id="stockTable" class="table table-hover table-bordered table-striped modern-table">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Date</th>
-                        {% if request.user.is_staff %}
-                            <th>Opening Stock</th>
-                        {% endif %}
-                        
-                        <th>Added Stock</th>
-                        <th>Sold Stock</th>
-                        <th>System</th>
-                        <th>Physical Stock</th>
-                        
-                        <th>System Different</th>
-                        <th>Physical Different</th>
-                        
-                        
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for stock in stock_records %}
-                        <tr>
-                            <td>{{ stock.date }}</td>
-                            {% if request.user.is_staff %}
-                                <td>{{ stock.wehave }}</td>
-                            {% endif %}
-                            
-                            <td>{{ stock.contact }}</td>
-                            <td>{{ stock.sold_today }}</td>
-                            <td>{{ stock.system }}</td>
-                            <td>{{ stock.remaining }}</td>
-                            
-                            <td>{{ stock.review1 }}</td>
-                            <td>{{ stock.review2 }}</td>
-                            
-                            
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            
-        </div>
-    {% else %}
-        <div class="alert alert-warning text-center">No stock records available for this store.</div>
-    {% endif %}
-
-</div>
-
-
-<!-- Styles -->
-<style>
     .modern-button {
         font-size: 16px;
         font-weight: bold;
@@ -124,8 +56,12 @@
     .modern-table {
         font-family: 'Segoe UI', sans-serif;
         border-radius: 10px;
-        overflow: hidden;
+        overflow-x: auto;
         font-size: 15px;
+        width: 100%;
+        white-space: nowrap;
+        border-collapse: separate;
+        border-spacing: 0;
     }
 
     .modern-table thead {
@@ -134,51 +70,6 @@
     }
 
     .modern-table th, .modern-table td {
-        padding: 12px;
-        vertical-align: middle;
-        text-align: center;
-    }
-
-    .modern-table tbody tr:hover {
-        background-color: #eef2ff;
-        cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-        .modern-table th, .modern-table td {
-            font-size: 13px;
-            padding: 10px 5px;
-            width:60px
-        }
-
-        .modern-button {
-            width: 100%;
-        }
-    }
-</style>
-<style>
-    h2 {
-        font-weight: bold;
-        color: #2575fc;
-        text-shadow: 0 0 10px rgba(37, 117, 252, 0.7);
-    }
-
-    .modern-table {
-        font-family: 'Segoe UI', sans-serif;
-        border-radius: 10px;
-        overflow-x: auto;
-        font-size: 15px;
-        width: 100%;
-        white-space: nowrap;
-    }
-
-    .modern-table thead {
-        background-color: #1e3a8a;
-        color: #fff;
-    }
-
-    .modern-table th,
-    .modern-table td {
         padding: 8px;
         vertical-align: middle;
         text-align: center;
@@ -199,10 +90,10 @@
             font-size: 20px;
         }
 
-        .modern-table th,
-        .modern-table td {
+        .modern-table th, .modern-table td {
             font-size: 12px;
             padding: 5px;
+            width: 60px;
         }
 
         .modern-button {
@@ -219,71 +110,112 @@
     }
 </style>
 
+<h2 class="text-center mt-4">{{ store.location }}</h2>
+
+<div class="container mt-4">
+
+    <!-- Add Stock Button -->
+    <div class="text-end mb-3">
+        <a href="{% url 'add_stock' store.id %}" class="btn btn-success modern-button">Reporting</a>
+    </div>
+
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search stock records..." onkeyup="searchTable()">
+    </div>
+
+    {% if stock_records %}
+    <div class="table-responsive">
+        <table id="stockTable" class="table table-hover table-bordered table-striped modern-table">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    {% if request.user.is_staff %}
+                        <th>Opening Stock</th>
+                    {% endif %}
+                    <th>Added Stock</th>
+                    <th>Sold Stock</th>
+                    {% if request.user.is_staff %}
+                        <th>System</th>
+                    {% endif %}
+                    <th>Physical Stock</th>
+                    {% if request.user.is_staff %}
+                        <th>System Different</th>
+                    {% endif %}
+                    <th>Physical Different</th>
+                    {% if request.user.is_staff %}
+                        <th>Value</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stock_records %}
+                <tr>
+                    <td>{{ stock.date }}</td>
+                    {% if request.user.is_staff %}
+                        <td>{{ stock.wehave }}</td>
+                    {% endif %}
+                    <td>{{ stock.contact }}</td>
+                    <td>{{ stock.sold_today }}</td>
+                    {% if request.user.is_staff %}
+                        <td>{{ stock.system }}</td>
+                    {% endif %}
+                    <td>{{ stock.remaining }}</td>
+                    {% if request.user.is_staff %}
+                        <td>{{ stock.review1 }}</td>
+                    {% endif %}
+                    <td>{{ stock.review2 }}</td>
+                    {% if request.user.is_staff %}
+                        <td>{{ stock.stock_value }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center">No stock records available for this store.</div>
+    {% endif %}
+</div>
 
 <script>
-    function searchTable() {
-        var input = document.getElementById("searchInput");
-        var filter = input.value.toUpperCase();
-        var table = document.getElementById("stockTable");
-        var tr = table.getElementsByTagName("tr");
+function searchTable() {
+    var input = document.getElementById("searchInput");
+    var filter = input.value.toUpperCase();
+    var table = document.getElementById("stockTable");
+    var tr = table.getElementsByTagName("tr");
 
-        // Loop through all table rows
-        for (var i = 1; i < tr.length; i++) { // Start at 1 to skip the header row
-            var showRow = false; // Flag to determine whether to show the row or not
-            var td = tr[i].getElementsByTagName("td");
+    for (var i = 1; i < tr.length; i++) {  // Skip header row
+        var showRow = false;
+        var td = tr[i].getElementsByTagName("td");
 
-            // Loop through all table cells in each row
-            for (var j = 0; j < td.length; j++) {
-                if (td[j]) {
-                    var txtValue = td[j].textContent || td[j].innerText;
-
-                    // If the cell text contains the search term
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        showRow = true; // Mark the row for showing
-                        highlightText(td[j], filter); // Highlight matching text
-                    } else {
-                        // Reset the cell content to remove any previous highlights
-                        td[j].innerHTML = td[j].textContent || td[j].innerText;
-                    }
+        for (var j = 0; j < td.length; j++) {
+            if (td[j]) {
+                var txtValue = td[j].textContent || td[j].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    showRow = true;
+                    highlightText(td[j], filter);
+                } else {
+                    // Reset cell content (remove previous highlights)
+                    td[j].innerHTML = td[j].textContent || td[j].innerText;
                 }
             }
-
-            // Show or hide the row based on the flag
-            tr[i].style.display = showRow ? "" : "none";
         }
+        tr[i].style.display = showRow ? "" : "none";
     }
+}
 
-    function highlightText(cell, searchTerm) {
-        var cellText = cell.textContent || cell.innerText;
-        var matchIndex = cellText.toUpperCase().indexOf(searchTerm.toUpperCase());
+function highlightText(cell, searchTerm) {
+    var cellText = cell.textContent || cell.innerText;
+    var matchIndex = cellText.toUpperCase().indexOf(searchTerm.toUpperCase());
 
-        if (matchIndex > -1) {
-            var beforeMatch = cellText.substring(0, matchIndex);
-            var match = cellText.substring(matchIndex, matchIndex + searchTerm.length);
-            var afterMatch = cellText.substring(matchIndex + searchTerm.length);
+    if (matchIndex > -1) {
+        var beforeMatch = cellText.substring(0, matchIndex);
+        var match = cellText.substring(matchIndex, matchIndex + searchTerm.length);
+        var afterMatch = cellText.substring(matchIndex + searchTerm.length);
 
-            // Update the cell's HTML with bolded matching text
-            cell.innerHTML = beforeMatch + '<span class="highlight">' + match + '</span>' + afterMatch;
-        }
+        cell.innerHTML = beforeMatch + '<span class="highlight">' + match + '</span>' + afterMatch;
     }
+}
 </script>
 
-<style>
-    .highlight {
-        font-weight: bold;
-        color: green; /* Optional: Change color of the highlighted text */
-    }
-</style>
-
-
-
 {% endblock %}
-
-
-
-
-
-
-
-
-

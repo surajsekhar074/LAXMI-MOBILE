@@ -97,7 +97,8 @@ def index(request):
         total_contact=Sum('contact'),  total_sold=Sum('sold_today'),
         total_remaining=Sum('remaining'),
         total_review1=Sum('review1'),
-        total_review2=Sum('review2')
+        total_review2=Sum('review2'),
+        total_stock_value=Sum('stock_value')
     )
 
     context = {
@@ -143,57 +144,119 @@ from .models import Store, Stock
 from .utils import save_note_to_cache
 from datetime import date
 from django.contrib.auth.decorators import login_required
+from decimal import Decimal
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from datetime import date, datetime
+from decimal import Decimal, InvalidOperation
+from .models import Store, Stock
+from .utils import save_note_to_cache  # assuming you have this utility
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from decimal import Decimal, InvalidOperation
+from datetime import date, datetime
+from .models import Store, Stock
+from .utils import save_note_to_cache  # optional
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from decimal import Decimal, InvalidOperation
+from datetime import date, datetime
+from .models import Store, Stock
+from .utils import save_note_to_cache
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from decimal import Decimal, InvalidOperation
+from datetime import date, datetime
+from .models import Store, Stock
+from .utils import save_note_to_cache
+
 
 @login_required
 def add_stock(request, store_id):
     store = get_object_or_404(Store, id=store_id)
+    today = date.today()
     yesterday_stock = Stock.objects.filter(store=store).order_by('-date').first()
     yesterday_remaining = yesterday_stock.remaining if yesterday_stock else 0
-    today = date.today().isoformat()
+
+    all_dates = Stock.objects.filter(store=store).values_list('date', flat=True).distinct().order_by('-date')
 
     if request.method == 'POST':
-        form_date = request.POST.get('date')
-        contact = int(request.POST.get('contact'))
-        sold_today = int(request.POST.get('sold_today'))
-        entered_remaining = int(request.POST.get('remaining'))
-        system = int(request.POST.get('system'))
+        form_date_str = request.POST.get('date') or today.isoformat()
+        try:
+            form_date = datetime.strptime(form_date_str, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            form_date = today
+
+        contact = int(request.POST.get('contact') or 0)
+        sold_today = int(request.POST.get('sold_today') or 0)
+        remaining = int(request.POST.get('remaining') or 0)
+        system = int(request.POST.get('system') or 0)
         note = request.POST.get('note', '').strip()
 
-        # Use yesterday's remaining as opening stock
+        try:
+            stock_value = Decimal(request.POST.get('stock_value') or '0')
+        except InvalidOperation:
+            stock_value = Decimal('0')
+
         wehave = yesterday_remaining
-
-        # Calculate abc
         abc = wehave + contact - sold_today
-
-        # Calculate review1 and review2
         review1 = abc - system
-        review2 = abc - entered_remaining
+        review2 = abc - remaining
 
-        # Save note if present
         if note:
             save_note_to_cache(note, request.user)
 
-        # Save the stock entry with both review values
-        Stock.objects.create(
+        stock_record, created = Stock.objects.get_or_create(
             store=store,
             date=form_date,
-            wehave=wehave,
-            contact=contact,
-            sold_today=sold_today,
-            system=system,
-            remaining=entered_remaining,
-            
-            review1=review1,
-            review2=review2
-            
+            defaults={
+                'wehave': wehave,
+                'contact': contact,
+                'sold_today': sold_today,
+                'remaining': remaining,
+                'system': system,
+                'stock_value': stock_value,
+                'review1': review1,
+                'review2': review2,
+                'note': note,
+            }
         )
+
+        # ✅ SUPERUSER can override everything
+        if not created:
+            if request.user.is_superuser:
+                stock_record.wehave = wehave
+                stock_record.contact = contact
+                stock_record.sold_today = sold_today
+                stock_record.remaining = remaining
+                stock_record.system = system
+                stock_record.stock_value = stock_value
+                stock_record.review1 = review1
+                stock_record.review2 = review2
+                stock_record.note = note
+                stock_record.save()
+            elif request.user.is_staff:
+                stock_record.system = system
+                stock_record.stock_value = stock_value
+                stock_record.review1 = review1
+                stock_record.save()
+            else:
+                stock_record.contact = contact
+                stock_record.sold_today = sold_today
+                stock_record.remaining = remaining
+                stock_record.review2 = review2
+                stock_record.save()
 
         return redirect('store_stock_view', store_id=store.id)
 
     return render(request, 'add_stock.html', {
         'store': store,
         'yesterday_remaining': yesterday_remaining,
-        'today': today,
+        'today': today.isoformat(),
+        'all_dates': all_dates if request.user.is_superuser else None
     })
 
 
@@ -201,9 +264,6 @@ def add_stock(request, store_id):
 
 
 
-
-
-      
 
 
 

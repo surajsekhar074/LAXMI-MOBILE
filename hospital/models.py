@@ -13,7 +13,9 @@ class Store(models.Model):
 # Stock model
 class Stock(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, null=True, blank=True)
-    date = models.DateTimeField(null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
+
+
     wehave = models.IntegerField(default=0)
     contact = models.IntegerField(default=0)
     sold_today = models.IntegerField(default=0)
@@ -23,6 +25,9 @@ class Stock(models.Model):
 
     review1 = models.IntegerField(default=0)  # abc - system
     review2 = models.IntegerField(default=0)  # abc - remaining
+    stock_value = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    note = models.TextField(blank=True, null=True)
+  
 
     def __str__(self):
         return f"Stock on {self.date}"
@@ -34,3 +39,4 @@ class WorkerProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+

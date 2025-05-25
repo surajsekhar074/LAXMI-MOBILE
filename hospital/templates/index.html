@@ -202,6 +202,12 @@
             {{ totals.total_review2|default:0 }}
             <div class="stock-title">Physical Different</div>
         </div>
+        <div class="stock-box">
+         <i class="fas fa-rupee-sign fa-lg mb-2"></i><br>
+          ₹{{ totals.total_stock_value|default:"0.00" }}
+        <div class="stock-title">Stock Value</div>
+</div>
+        
         
     </div>
 </div>
@@ -277,6 +283,10 @@
   const glowSystem = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
   glowSystem.addColorStop(0, '#fca5a5');
   glowSystem.addColorStop(1, '#ef4444');
+  const glowStockValue = ctx.createRadialGradient(150, 150, 50, 150, 150, 150);
+  glowStockValue.addColorStop(0, '#c7d2fe');
+  glowStockValue.addColorStop(1, '#4f46e5');
+
 
   // Doughnut Chart
   new Chart(ctx, {
@@ -292,7 +302,8 @@
           {{ totals.total_remaining|default:0 }},
           {{ totals.total_review1|default:0 }},
           {{ totals.total_review2|default:0 }},
-          {{ totals.total_system|default:0 }}
+          {{ totals.total_system|default:0 }},
+          
         ],
         backgroundColor: [
           glowOpening,
@@ -301,6 +312,7 @@
           glowRemaining,
           glowReview1,
           glowReview2,
+          glowStockValue,
           glowSystem
         ],
         borderWidth: 0,
@@ -356,11 +368,16 @@
   barGlowSystem.addColorStop(0, '#fca5a5');
   barGlowSystem.addColorStop(1, '#ef4444');
 
+  const barGlowValue = ctxBar.createLinearGradient(0, 0, 0, 280);
+  barGlowValue.addColorStop(0, '#d1fae5');
+  barGlowValue.addColorStop(1, '#059669');
+
+
   // Bar Chart
   new Chart(ctxBar, {
     type: 'bar',
     data: {
-      labels: ['Opening', 'Added', 'Sold', 'Physical', 'Different 1', 'Different 2', 'System'],
+      labels: ['Opening', 'Added', 'Sold', 'Physical', 'Different 1', 'Different 2', 'System' ],
       datasets: [{
         label: 'Stock',
         data: [
@@ -370,7 +387,8 @@
           {{ totals.total_remaining|default:0 }},
           {{ totals.total_review1|default:0 }},
           {{ totals.total_review2|default:0 }},
-          {{ totals.total_system|default:0 }}
+          {{ totals.total_system|default:0 }},
+          
         ],
         backgroundColor: [
           barGlowOpening,
@@ -379,7 +397,8 @@
           barGlowRemaining,
           barGlowReview1,
           barGlowReview2,
-          barGlowSystem
+          barGlowSystem,
+          barGlowValue
         ],
         borderColor: '#4c1d95',
         borderWidth: 1,
