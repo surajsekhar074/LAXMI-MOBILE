@@ -176,6 +176,11 @@
     <div class="alert alert-warning text-center">No stock records available for this store.</div>
     {% endif %}
 </div>
+<script>
+    // Make your stock data available to JavaScript
+    const allStockData = JSON.parse('{{ stock_data|safe }}');
+</script>
+<canvas id="stockValueChart" width="400" height="200"></canvas>
 
 <script>
 function searchTable() {

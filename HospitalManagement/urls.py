@@ -15,11 +15,14 @@ urlpatterns = [
     path('login/', custom_login_view, name='login'),
     path('logout/', logout_Admin, name='logout'),
 
+
     # Store and Stock
     path('store/<int:store_id>/stock/', store_stock_view, name='store_stock_view'),
     path('store/<int:store_id>/add_stock/', add_stock, name='add_stock'),
     path('store_register/', register_store, name='register_store'),
     path('accounts/redirect/', redirect_to_store_stock, name='login_redirect'),
+    path('add-staff/', add_staff, name='add_staff'),
+
 
     # Admin user management
     path('store/<int:store_id>/admin_add_user/', add_user_to_store, name='admin_add_user'),
@@ -30,6 +33,9 @@ urlpatterns = [
 
     # Notifications
     path('notifications/', notifications_view, name='notifications_view'),
+    path('all-staff/', all_staff, name='all_staff'),  # 👈 New route
+    path('edit-staff/<int:user_id>/', edit_staff, name='edit_staff'),
+    path('delete-staff/<int:user_id>/', delete_staff, name='delete_staff'),
 ]
 
 # Serve static files in development

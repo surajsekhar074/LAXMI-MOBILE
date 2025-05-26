@@ -139,37 +139,10 @@ def register_store(request):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-from django.shortcuts import get_object_or_404, render, redirect
-from .models import Store, Stock
-from .utils import save_note_to_cache
-from datetime import date
-from django.contrib.auth.decorators import login_required
-from decimal import Decimal
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from datetime import date, datetime
-from decimal import Decimal, InvalidOperation
-from .models import Store, Stock
-from .utils import save_note_to_cache  # assuming you have this utility
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
-from datetime import date, datetime
-from .models import Store, Stock
-from .utils import save_note_to_cache  # optional
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from decimal import Decimal, InvalidOperation
-from datetime import date, datetime
-from .models import Store, Stock
-from .utils import save_note_to_cache
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from decimal import Decimal, InvalidOperation
-from datetime import date, datetime
 from .models import Store, Stock
 from .utils import save_note_to_cache
 
@@ -178,18 +151,14 @@ from .utils import save_note_to_cache
 def add_stock(request, store_id):
     store = get_object_or_404(Store, id=store_id)
     today = date.today()
-    yesterday_stock = Stock.objects.filter(store=store).order_by('-date').first()
-    yesterday_remaining = yesterday_stock.remaining if yesterday_stock else 0
 
-    all_dates = Stock.objects.filter(store=store).values_list('date', flat=True).distinct().order_by('-date')
+    # Get yesterday's remaining stock
+    yesterday = today - timedelta(days=1)
+    previous_stock = Stock.objects.filter(store=store, date=yesterday).first()
+    yesterday_remaining = previous_stock.remaining if previous_stock else 0
 
     if request.method == 'POST':
-        form_date_str = request.POST.get('date') or today.isoformat()
-        try:
-            form_date = datetime.strptime(form_date_str, '%Y-%m-%d').date()
-        except (ValueError, TypeError):
-            form_date = today
-
+        # Get form inputs
         contact = int(request.POST.get('contact') or 0)
         sold_today = int(request.POST.get('sold_today') or 0)
         remaining = int(request.POST.get('remaining') or 0)
@@ -201,17 +170,20 @@ def add_stock(request, store_id):
         except InvalidOperation:
             stock_value = Decimal('0')
 
+        # Calculations
         wehave = yesterday_remaining
         abc = wehave + contact - sold_today
         review1 = abc - system
         review2 = abc - remaining
 
+        # Save note to cache
         if note:
             save_note_to_cache(note, request.user)
 
+        # Create or update today's stock record
         stock_record, created = Stock.objects.get_or_create(
             store=store,
-            date=form_date,
+            date=today,
             defaults={
                 'wehave': wehave,
                 'contact': contact,
@@ -225,7 +197,6 @@ def add_stock(request, store_id):
             }
         )
 
-        # ✅ SUPERUSER can override everything
         if not created:
             if request.user.is_superuser:
                 stock_record.wehave = wehave
@@ -256,8 +227,10 @@ def add_stock(request, store_id):
         'store': store,
         'yesterday_remaining': yesterday_remaining,
         'today': today.isoformat(),
-        'all_dates': all_dates if request.user.is_superuser else None
     })
+
+
+
 
 
 
@@ -458,3 +431,78 @@ def delete_user_view(request, user_id):
 
 
 
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+from django.contrib.auth.models import User
+
+def is_superuser(user):
+    return user.is_superuser
+
+@login_required
+@user_passes_test(is_superuser, login_url='/admin/login/')
+def add_staff(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_staff = True
+            user.is_superuser = request.POST.get('is_superuser') == 'on'
+            user.save()
+            messages.success(request, 'Staff member created successfully!')
+            return redirect('add_staff')
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'add_staff.html', {'form': form})
+
+
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib import messages
+from django.contrib.auth.models import User
+
+def is_superuser(user):
+    return user.is_superuser
+
+@login_required
+@user_passes_test(is_superuser)
+def all_staff(request):
+    staff_users = User.objects.filter(is_staff=True)
+    return render(request, 'all_staff.html', {'staff_users': staff_users})
+
+from .forms import StaffEditForm
+
+@login_required
+@user_passes_test(is_superuser)
+def edit_staff(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    if request.method == 'POST':
+        form = StaffEditForm(request.POST, instance=user)
+        if form.is_valid():
+            user = form.save(commit=False)
+            password = form.cleaned_data.get('password1')
+            if password:
+                user.set_password(password)
+            user.save()
+            messages.success(request, 'Staff updated successfully.')
+            return redirect('all_staff')
+    else:
+        form = StaffEditForm(instance=user)
+
+    return render(request, 'edit_staff.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_superuser)
+def delete_staff(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'Staff deleted successfully.')
+        return redirect('all_staff')
+    return render(request, 'delete_staff_confirm.html', {'user': user})

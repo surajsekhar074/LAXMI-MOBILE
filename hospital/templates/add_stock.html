@@ -1,16 +1,13 @@
 {% extends 'nvgbar.html' %}
 {% block body %}
 
-
-
-
 <div class="mt-3 d-flex justify-content-end">
     <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
 </div>
 
 <div class="container mt-4">
     <div class="card shadow-lg rounded-4 p-4">
-        <h2 class="text-center mb-4 text-primary"> Add Report</h2>
+        <h2 class="text-center mb-4 text-primary">Add Report</h2>
 
         <form method="post">
             {% csrf_token %}
@@ -18,21 +15,20 @@
             <div class="form-floating mb-3">
                 <input type="date" name="date" id="date" class="form-control" value="{{ today }}" min="{{ today }}" required>
             </div>
-            
 
-            {% if request.user.is_staff %}
-            <div class="form-floating mb-3">
-                <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" readonly required>
-                <label for="wehave">Opening Stock</label>
-            </div>
-            {% else %}
-            <input type="hidden" id="wehave" name="wehave" value="{{ yesterday_remaining }}">
-            {% endif %}
+            {% if request.user.is_superuser %}
+<div class="form-floating mb-3">
+    <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" readonly required>
+    <label for="wehave">Opening Stock</label>
+</div>
+{% else %}
+<input type="hidden" id="wehave" name="wehave" value="{{ yesterday_remaining }}">
+{% endif %}
 
             <!-- Add Stock -->
             <div class="form-floating mb-3">
                 <input type="number" id="contact" name="contact" class="form-control"
-                    {% if request.user.is_staff %}readonly{% endif %}
+                    {% if request.user.is_staff and not request.user.is_superuser %}readonly{% endif %}
                     required>
                 <label for="contact">Add Stock</label>
             </div>
@@ -40,13 +36,13 @@
             <!-- Sold Stock -->
             <div class="form-floating mb-3">
                 <input type="number" id="sold_today" name="sold_today" class="form-control"
-                    {% if request.user.is_staff %}readonly{% endif %}
+                    {% if request.user.is_staff and not request.user.is_superuser %}readonly{% endif %}
                     required>
                 <label for="sold_today">Sold Stock</label>
             </div>
 
-            <!-- System (Staff Only) -->
-            {% if request.user.is_staff or request.user.is_superuser %}
+            <!-- System (Superuser & Staff) -->
+            {% if request.user.is_superuser or request.user.is_staff %}
             <div class="form-floating mb-3">
                 <input type="number" id="system" name="system" class="form-control" value="0">
                 <label for="system">System</label>
@@ -58,27 +54,27 @@
             <!-- Physical Stock -->
             <div class="form-floating mb-3">
                 <input type="number" id="remaining" name="remaining" class="form-control"
-                    {% if request.user.is_staff %}readonly{% endif %}
+                    {% if request.user.is_staff and not request.user.is_superuser %}readonly{% endif %}
                     required>
                 <label for="remaining">Physical Stock</label>
             </div>
 
-            <!-- System Difference (only for staff) -->
-            {% if request.user.is_staff or request.user.is_superuser %}
+            <!-- System Difference -->
+            {% if request.user.is_superuser or request.user.is_staff %}
             <div class="form-floating mb-3">
                 <input type="number" id="review1" name="review1" class="form-control" readonly>
                 <label for="review1">System Different</label>
             </div>
             {% endif %}
 
-            <!-- Physical Difference (all users) -->
+            <!-- Physical Difference -->
             <div class="form-floating mb-3">
                 <input type="number" id="review2" name="review2" class="form-control" readonly>
                 <label for="review2">Physical Different</label>
             </div>
 
-            <!-- Stock Value (Staff only) -->
-            {% if request.user.is_staff or request.user.is_superuser %}
+            <!-- Stock Value (Superuser & Staff) -->
+            {% if request.user.is_superuser or request.user.is_staff %}
             <div class="form-floating mb-3">
                 <input type="number" id="stock_value" name="stock_value" class="form-control" placeholder="0">
                 <label for="stock_value">💰 Stock Value (in ₹)</label>
@@ -93,7 +89,7 @@
                 <label for="note">Issue Note</label>
             </div>
 
-            <!-- Hidden store ID -->
+            <!-- Store ID (hidden) -->
             <input type="hidden" name="store_id" value="{{ store.id }}">
 
             <div class="d-grid">
@@ -103,7 +99,7 @@
     </div>
 </div>
 
-<!-- JS: Calculate Reviews -->
+<!-- JS for Calculating Review -->
 <script>
     function calculateReview() {
         const wehave = parseInt(document.getElementById('wehave')?.value) || 0;
@@ -116,7 +112,7 @@
 
         const abc = wehave + contact - (isNaN(sold_today) ? 0 : sold_today);
 
-        // Review 1 (System Difference)
+        // Review 1: System Difference
         const systemField = document.getElementById('system');
         const system = parseInt(systemField?.value);
         const review1Field = document.getElementById('review1');
@@ -128,7 +124,7 @@
             }
         }
 
-        // Review 2 (Physical Difference)
+        // Review 2: Physical Difference
         const review2Field = document.getElementById('review2');
         if (review2Field) {
             if (!isNaN(remaining) && sold_today_val && remaining_val) {
@@ -139,22 +135,16 @@
         }
     }
 
-    // Attach listeners
+    // Run on load and on field input
     ['contact', 'sold_today', 'remaining', 'system'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', calculateReview);
     });
 
-    // ✅ Run on load too
     window.addEventListener('DOMContentLoaded', calculateReview);
 </script>
 
-
-
-
-
-
-
+<!-- Styles -->
 <style>
     .container {
         max-width: 600px;
@@ -229,6 +219,5 @@
         }
     }
 </style>
-
 
 {% endblock %}

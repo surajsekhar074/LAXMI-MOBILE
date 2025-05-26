@@ -1,0 +1,39 @@
+{% extends 'nvgbar.html' %}
+{% block body %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>All Staff Members</h2>
+        <a href="{% url 'add_staff' %}" class="btn btn-primary">Add New Staff</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Superuser</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in staff_users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.is_superuser }}</td>
+                <td>
+                    <a href="{% url 'edit_staff' user.id %}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{% url 'delete_staff' user.id %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

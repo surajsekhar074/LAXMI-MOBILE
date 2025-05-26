@@ -1,0 +1,22 @@
+{% extends 'nvgbar.html' %}
+{% block body %}
+<div class="container mt-5">
+    <div class="card p-4 shadow">
+        <h4>Edit Staff Member</h4>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.username.label_tag }} {{ form.username }}
+            </div>
+            <div class="mb-3">
+                {{ form.password1.label_tag }} {{ form.password1 }}
+            </div>
+            <div class="mb-3">
+                {{ form.password2.label_tag }} {{ form.password2 }}
+            </div>
+            <button type="submit" class="btn btn-success">Save Changes</button>
+            <a href="{% url 'all_staff' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
