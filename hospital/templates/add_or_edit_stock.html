@@ -1,0 +1,209 @@
+{% extends 'nvgbar.html' %}
+{% block body %}
+
+<div class="mt-3 d-flex justify-content-end">
+    <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
+</div>
+
+<div class="container mt-4">
+    <div class="card shadow-lg rounded-4 p-4">
+        <h2 class="text-center mb-4 text-primary">
+            {% if is_edit %}Edit{% else %}Add{% endif %} Stock Report for {{ selected_date }}
+        </h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Date picker: onchange reloads page with selected date -->
+            
+            <!-- Opening Stock (wehave) from yesterday's remaining -->
+            {% if request.user.is_superuser %}
+             <div class="form-floating mb-3">
+            <label for="wehave">Opening Stock</label>
+            <input type="number" id="wehave" name="wehave" class="form-control"
+            value="{{ yesterday_remaining|default:0 }}" readonly>
+
+            {% else %}
+            <input type="hidden" id="wehave" name="wehave" value="{{ stock.wehave|default:yesterday_remaining }}">
+            {% endif %}
+            </div>
+            <!-- Add Stock -->
+            <div class="form-floating mb-3">
+                <input type="number" id="contact" name="contact" class="form-control"
+                       value="{{ stock.contact|default_if_none:'' }}"
+                       {% if request.user.is_staff and not request.user.is_superuser %}readonly{% endif %}
+                       required>
+                <label for="contact">Add Stock</label>
+            </div>
+
+            <!-- Sold Stock -->
+            <div class="form-floating mb-3">
+                <input type="number" id="sold_today" name="sold_today" class="form-control"
+                       value="{{ stock.sold_today|default_if_none:'' }}"
+                       {% if request.user.is_staff and not request.user.is_superuser %}readonly{% endif %}
+                       required>
+                <label for="sold_today">Sold Stock</label>
+            </div>
+
+            <!-- System (Superuser & Staff) -->
+            {% if request.user.is_superuser or request.user.is_staff %}
+            <div class="form-floating mb-3">
+                <input type="number" id="system" name="system" class="form-control"
+                       value="{{ stock.system|default:'0' }}">
+                <label for="system">System</label>
+            </div>
+            {% else %}
+            <input type="hidden" name="system" value="{{ stock.system|default:'0' }}">
+            {% endif %}
+
+            <!-- Physical Stock -->
+            <div class="form-floating mb-3">
+                <input type="number" id="remaining" name="remaining" class="form-control"
+                       value="{{ stock.remaining|default_if_none:'' }}"
+                       {% if request.user.is_staff and not request.user.is_superuser %}readonly{% endif %}
+                       required>
+                <label for="remaining">Physical Stock</label>
+            </div>
+
+            <!-- System Difference (review1) -->
+            {% if request.user.is_superuser or request.user.is_staff %}
+            <div class="form-floating mb-3">
+                <input type="number" id="review1" name="review1" class="form-control"
+                       value="{{ stock.review1|default:'' }}" readonly>
+                <label for="review1">System Difference</label>
+            </div>
+            {% endif %}
+
+            <!-- Physical Difference (review2) -->
+            <div class="form-floating mb-3">
+                <input type="number" id="review2" name="review2" class="form-control"
+                       value="{{ stock.review2|default:'' }}" readonly>
+                <label for="review2">Physical Difference</label>
+            </div>
+
+            <!-- Stock Value (Superuser & Staff) -->
+            {% if request.user.is_superuser or request.user.is_staff %}
+            <div class="form-floating mb-3">
+                <input type="number" step="0.01" id="stock_value" name="stock_value" class="form-control"
+                       value="{{ stock.stock_value|default:'0' }}" placeholder="0">
+                <label for="stock_value">💰 Stock Value (in ₹)</label>
+            </div>
+            {% else %}
+            <input type="hidden" name="stock_value" value="{{ stock.stock_value|default:'0' }}">
+            {% endif %}
+
+            <!-- Note -->
+            <div class="form-floating mb-3">
+                <textarea class="form-control" id="note" name="note" placeholder="Describe any issue...">{{ stock.note|default:'' }}</textarea>
+                <label for="note">Issue Note</label>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-gradient">💾 Save Stock</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function calculateReview() {
+        const wehave = parseInt(document.getElementById('wehave')?.value) || 0;
+        const contact = parseInt(document.getElementById('contact')?.value) || 0;
+        const sold_today_val = document.getElementById('sold_today')?.value;
+        const remaining_val = document.getElementById('remaining')?.value;
+        const systemField = document.getElementById('system');
+        const review1Field = document.getElementById('review1');
+        const review2Field = document.getElementById('review2');
+
+        const sold_today = parseInt(sold_today_val);
+        const remaining = parseInt(remaining_val);
+        const system = parseInt(systemField?.value) || 0;
+
+        const abc = wehave + contact - (isNaN(sold_today) ? 0 : sold_today);
+
+        // Review 1: System Difference
+        if (review1Field) {
+            review1Field.value = !isNaN(system) ? abc - system : '';
+        }
+
+        // Review 2: Physical Difference
+        if (review2Field) {
+            review2Field.value = !isNaN(remaining) ? abc - remaining : '';
+        }
+    }
+
+    // Run on load and on input events
+    ['contact', 'sold_today', 'remaining', 'system'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', calculateReview);
+    });
+
+    window.addEventListener('DOMContentLoaded', calculateReview);
+</script>
+
+<style>
+    /* Your existing styles here */
+    .container {
+        max-width: 600px;
+        margin: auto;
+    }
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f1f4f9;
+        color: #333;
+        font-weight: bold;
+    }
+    .card {
+        background: white;
+        border: none;
+        border-radius: 16px;
+    }
+    .form-floating > label {
+        font-size: 14px;
+        color: #6c757d;
+        font-weight: bold;
+    }
+    .form-control {
+        border-radius: 10px;
+        height: 30px;
+        font-weight: bold;
+    }
+    .form-control:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    }
+    h2 {
+        font-weight: 700;
+        color: #1e3a8a;
+        text-shadow: 0 0 8px rgba(30, 58, 138, 0.6);
+    }
+    .btn-gradient {
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border: none;
+        color: white;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        font-weight: bold;
+    }
+    .btn-gradient:hover {
+        background: linear-gradient(135deg, #2575fc, #6a11cb);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    @media (max-width: 768px) {
+        .form-control {
+            height: 45px;
+            font-size: 15px;
+        }
+        h2 {
+            font-size: 22px;
+        }
+        .btn-gradient {
+            font-size: 15px;
+        }
+    }
+</style>
+
+{% endblock %}

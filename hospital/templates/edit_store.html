@@ -1,34 +1,25 @@
 {% extends 'nvgbar.html' %}
 {% block body %}
 
-<div>
-    <form action="{% url 'all_stores' %}" method="get">
-  <button type="submit" class="btn btn-primary">All Stores</button>
-</form>
-
-</div>
-
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Register Your Store</h2>
-
-
-
+    <h2 class="text-center mb-4">Edit Store</h2>
     <form method="POST">
         {% csrf_token %}
-        
         <div class="mb-3">
             <label for="name" class="form-label">Store Name:</label>
-            <input type="text" name="name" id="name" class="form-control form-control-sm" required>
+            <input type="text" name="name" id="name" class="form-control form-control-sm" required value="{{ store.name }}">
         </div>
 
         <div class="mb-3">
             <label for="location" class="form-label">Location:</label>
-            <input type="text" name="location" id="location" class="form-control form-control-sm" required>
+            <input type="text" name="location" id="location" class="form-control form-control-sm" required value="{{ store.location }}">
         </div>
 
-        <button type="submit" class="btn btn-primary btn-sm form-control">Submit</button>
+        <button type="submit" class="btn btn-primary btn-sm form-control">Update</button>
+        <a href="{% url 'register_store' %}" class="btn btn-secondary btn-sm form-control mt-2">Cancel</a>
     </form>
 </div>
+
 
 <style>
     body {

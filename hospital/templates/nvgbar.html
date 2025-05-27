@@ -152,7 +152,7 @@
 
     <div class="dropdown text-center mb-3">
       <button class="btn btn-primary dropdown-toggle" type="button" id="storeDropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-eye"></i> Show Stores
+        <i class="fas fa-eye"></i> Store report
       </button>
       <div class="dropdown-menu" aria-labelledby="storeDropdownMenu">
         {% for store in stores %}
@@ -184,13 +184,33 @@
         </li>
 
         <li>
+  <a href="{% url 'all_users' %}" class="hover:text-indigo-600 font-medium">
+    <i class="fas fa-users"></i> All Users
+  </a>
+</li>
+{% endif %}
 
-          <a href="{% url 'all_users' %}" class="hover:text-indigo-600 font-medium">All Users</a>
-        </li>
-        <li>
-        <a href="{% url 'add_staff' %}" class="hover:text-indigo-600 font-medium">Add staff</a>
-        </li>
-        {% endif %}
+{% if request.user.is_superuser %}
+<li>
+  <a href="{% url 'add_staff' %}" class="hover:text-indigo-600 font-medium">
+    <i class="fas fa-user-plus"></i> Add Staff
+  </a>
+</li>
+{% endif %}
+       
+
+
+{% if request.user.is_staff %}
+<li>
+  <a href="{% url 'notifications_view' %}" class="hover:text-indigo-600 font-medium flex items-center space-x-2">
+    <i class="fas fa-bell"></i>
+    <span>Notifications</span>
+    <span class="badge bg-red-600 text-white rounded-full px-2 text-xs">{{ notifications|length }}</span>
+  </a>
+</li>
+
+{% endif %}
+
 
         {% if request.user.is_staff %}
 
@@ -215,17 +235,6 @@
 {% endif %}
 
 
-
-{% if request.user.is_staff %}
-<div class="notification-icon">
-  <a href="{% url 'notifications_view' %}">
-      <span class="badge">{{ notifications|length }}</span> Notifications
-  </a>
-</div>
-
-
-
-{% endif %}
 
 
 

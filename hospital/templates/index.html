@@ -220,6 +220,9 @@
         dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
     });
 </script>
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap;">
@@ -421,6 +424,34 @@
     }
   });
 </script>
+<canvas id="barChart" width="400" height="200"></canvas>
+
+<script>
+  const ctx = document.getElementById('barChart').getContext('2d');
+  const barChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: {{ chart_labels|safe }},
+      datasets: [{
+        label: 'Stock Value (Last 7 Days)',
+        data: {{ chart_data|safe }},
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+
 
 
 {% endif %}

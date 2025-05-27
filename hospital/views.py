@@ -101,6 +101,8 @@ def index(request):
         total_stock_value=Sum('stock_value')
     )
 
+    
+
     context = {
         'stores': stores,
         'totals': totals,
@@ -506,3 +508,168 @@ def delete_staff(request, user_id):
         messages.success(request, 'Staff deleted successfully.')
         return redirect('all_staff')
     return render(request, 'delete_staff_confirm.html', {'user': user})
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from datetime import datetime, timedelta
+from .models import Store, Stock
+from .forms import StockForm
+
+@login_required
+def add_or_edit_stock(request, store_id):
+    store = get_object_or_404(Store, id=store_id)
+
+    # Get date from GET or POST (for editing a particular date)
+    date_str = request.GET.get('date') or request.POST.get('date')
+    if date_str:
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    else:
+        selected_date = date.today()
+
+    # Get yesterday's remaining stock for opening calculation
+    yesterday = selected_date - timedelta(days=1)
+    try:
+        yesterday_stock = Stock.objects.get(store=store, date=yesterday)
+        yesterday_remaining = yesterday_stock.remaining
+    except Stock.DoesNotExist:
+        yesterday_remaining = 0
+
+    stock = Stock.objects.filter(store=store, date=selected_date).first()
+
+    if request.method == 'POST':
+        # Use form if you have it, else manual parsing:
+        # Using manual here for clarity:
+
+        try:
+            contact = int(request.POST.get('contact') or 0)
+        except ValueError:
+            contact = 0
+        try:
+            sold_today = int(request.POST.get('sold_today') or 0)
+        except ValueError:
+            sold_today = 0
+        try:
+            remaining = int(request.POST.get('remaining') or 0)
+        except ValueError:
+            remaining = 0
+        try:
+            system = int(request.POST.get('system') or 0)
+        except ValueError:
+            system = 0
+
+        note = request.POST.get('note', '').strip()
+
+        try:
+            stock_value = Decimal(request.POST.get('stock_value') or '0')
+        except InvalidOperation:
+            stock_value = Decimal('0')
+
+        # Calculation
+        wehave = yesterday_remaining
+        abc = wehave + contact - sold_today
+        review1 = abc - system
+        review2 = abc - remaining
+
+        # Save or update the Stock record
+        if stock is None:
+            stock = Stock(store=store, date=selected_date)
+        stock.wehave = wehave
+        stock.contact = contact
+        stock.sold_today = sold_today
+        stock.remaining = remaining
+        stock.system = system
+        stock.stock_value = stock_value
+        stock.review1 = review1
+        stock.review2 = review2
+        stock.note = note
+        stock.save()
+
+        # Save note to cache if any
+        if note:
+            save_note_to_cache(note, request.user)
+
+        # Recalculate stock chain starting from selected_date
+        recalculate_stock_chain(store, selected_date)
+
+        return redirect('store_stock_view', store_id=store.id)
+
+    else:
+        # GET request: show form with existing stock data or blank
+        context = {
+            'store': store,
+            'selected_date': selected_date,
+            'yesterday_remaining': yesterday_remaining,
+            'stock': stock,
+        }
+        return render(request, 'add_or_edit_stock.html', context)
+
+def recalculate_stock_chain(store, from_date):
+    """
+    Recalculate opening (wehave), remaining, and reviews for stocks from from_date onwards
+    """
+    stocks = Stock.objects.filter(store=store, date__gte=from_date).order_by('date')
+
+    # Get previous stock before from_date for opening calculation
+    try:
+        prev_stock = Stock.objects.filter(store=store, date__lt=from_date).latest('date')
+    except Stock.DoesNotExist:
+        prev_stock = None
+
+    for stock in stocks:
+        # Opening stock (wehave) = previous day's remaining
+        if prev_stock:
+            stock.wehave = prev_stock.remaining
+        else:
+            stock.wehave = 0
+
+        # Calculate abc = wehave + contact - sold_today
+        abc = stock.wehave + (stock.contact or 0) - (stock.sold_today or 0)
+
+        # review1 = abc - system
+        stock.review1 = abc - (stock.system or 0)
+
+        # review2 = abc - remaining
+        stock.review2 = abc - (stock.remaining or 0)
+
+        # Calculate remaining if you want to auto-set (optional)
+        # stock.remaining = stock.wehave + stock.contact - stock.sold_today
+
+        stock.save()
+        prev_stock = stock
+
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Store
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def edit_store(request, store_id):
+    store = get_object_or_404(Store, id=store_id)
+    if request.method == 'POST':
+        store.name = request.POST['name']
+        store.location = request.POST.get('location', '')
+        store.save()
+        return redirect('register_store')
+    return render(request, 'edit_store.html', {'store': store})
+
+@login_required
+def delete_store(request, store_id):
+    store = get_object_or_404(Store, id=store_id)
+    if request.method == 'POST':
+        store.delete()
+        return redirect('register_store')
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Store
+
+@login_required
+def all_stores(request):
+    stores = Store.objects.all()
+    return render(request, 'all_stores.html', {'stores': stores})
+
