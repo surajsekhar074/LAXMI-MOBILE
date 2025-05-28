@@ -16,7 +16,7 @@
                 <input type="date" name="date" id="date" class="form-control" value="{{ today }}" min="{{ today }}" required>
             </div>
 
-            {% if request.user.is_superuser %}
+            {% if request.user.is_staff %}
 <div class="form-floating mb-3">
     <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" readonly required>
     <label for="wehave">Opening Stock</label>

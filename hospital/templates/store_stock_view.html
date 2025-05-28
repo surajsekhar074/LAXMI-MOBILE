@@ -6,7 +6,7 @@
     <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
 </div>
 {% endif %}
-{% if request.user.is_superuser %}
+{% if request.user.is_staff %}
 <form method="get" action="{% url 'add_or_edit_stock' store.id %}">
   <label for="date">Select Date:</label>
   <input type="date" name="date" id="date" value="{{ today|date:'Y-m-d' }}">
@@ -122,10 +122,18 @@
 <div class="container mt-4">
 
     <!-- Add Stock Button -->
+     {% if request.user.is_superuser %}
+     <div class="text-end mb-3">
+        <a href="{% url 'add_stock' store.id %}" class="btn btn-success modern-button">Reporting</a>
+    </div>
+{% else %}
+     {% if request.user.is_active and not request.user.is_staff %}
     <div class="text-end mb-3">
         <a href="{% url 'add_stock' store.id %}" class="btn btn-success modern-button">Reporting</a>
     </div>
-
+    {% endif %}
+    {% endif %}
+    
     <div class="mb-3">
         <input type="text" id="searchInput" class="form-control" placeholder="Search stock records..." onkeyup="searchTable()">
     </div>

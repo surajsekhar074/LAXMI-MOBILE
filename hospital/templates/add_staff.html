@@ -3,7 +3,7 @@
 {% block body %}
 {% load form_tags %}
 
-<a href="{% url 'all_staff' %}" class="btn btn-outline-secondary mb-3">View All Staff</a>
+<a href="{% url 'all_staff' %}" class="btn btn-outline-secondary mb-3">View All User</a>
 
 
 <div class="container mt-5">
@@ -11,7 +11,7 @@
         <div class="col-md-6">
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-header bg-primary text-white rounded-top-4">
-                    <h4 class="mb-0 text-center">Add Staff Member</h4>
+                    <h4 class="mb-0 text-center">Add User</h4>
                 </div>
                 <div class="card-body p-4">
                     {% if messages %}
@@ -53,7 +53,7 @@
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-block">Create Staff</button>
+                            <button type="submit" class="btn btn-primary btn-block">Create User</button>
                         </div>
                     </form>
                 </div>

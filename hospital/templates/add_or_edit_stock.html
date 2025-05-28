@@ -17,11 +17,12 @@
             <!-- Date picker: onchange reloads page with selected date -->
             
             <!-- Opening Stock (wehave) from yesterday's remaining -->
-            {% if request.user.is_superuser %}
+            {% if request.user.is_staff %}
              <div class="form-floating mb-3">
-            <label for="wehave">Opening Stock</label>
+            
             <input type="number" id="wehave" name="wehave" class="form-control"
             value="{{ yesterday_remaining|default:0 }}" readonly>
+            <label for="wehave">Opening Stock</label>
 
             {% else %}
             <input type="hidden" id="wehave" name="wehave" value="{{ stock.wehave|default:yesterday_remaining }}">
