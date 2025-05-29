@@ -1,0 +1,35 @@
+{% extends 'nvgbar.html' %}
+{% block body %}
+<div class="container mt-4">
+    <h3>All Different Reports</h3>
+    <table class="table table-bordered table-hover mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Store</th>
+                <th>User</th>
+                <th>Model</th>
+                <th>Problem</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for note in notes %}
+            <tr>
+                <td>{{ note.store.name }}</td>
+                <td>{{ note.user.username }}</td>
+                <td>{{ note.model_name }}</td>
+                <td>{{ note.problem }}</td>
+                <td>{{ note.created_at|date:"d M Y H:i" }}</td>
+                <td>
+                    <a href="{% url 'edit_note' note.id %}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="{% url 'delete_note' note.id %}" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">No notes found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

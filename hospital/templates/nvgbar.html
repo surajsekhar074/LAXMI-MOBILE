@@ -7,6 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>STOCK MANAGE</title>
 
+
+      
   <!-- Bootstrap & FontAwesome -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -143,6 +145,14 @@
     <div class="sidebar-header">
       <i class="fas fa-box"></i> STOCK MANAGE
     </div>
+
+     <div class="ml-auto">
+  {% if user.is_authenticated %}
+    <span>Logged in as: <strong>{{ user.username }}</strong></span>
+    
+
+  {% endif %}
+</div><br>
     {% if request.user.is_staff %}
     
 
@@ -202,14 +212,14 @@
 
 {% if request.user.is_staff %}
 <li>
-  <a href="{% url 'notifications_view' %}" class="hover:text-indigo-600 font-medium flex items-center space-x-2">
+  <a href="{% url 'view_notes' %}" class="hover:text-indigo-600 font-medium flex items-center space-x-2">
     <i class="fas fa-bell"></i>
-    <span>Notifications</span>
+    <span>Different Report</span>
     <span class="badge bg-red-600 text-white rounded-full px-2 text-xs">{{ notifications|length }}</span>
   </a>
 </li>
-
 {% endif %}
+
 
 
         {% if request.user.is_superuser %}

@@ -1,0 +1,19 @@
+{% extends 'nvgbar.html' %}
+{% block body %}
+<div class="container mt-4">
+    <h4>Edit Note</h4>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Model Name</label>
+            <input type="text" name="model_name" class="form-control" value="{{ note.model_name }}">
+        </div>
+        <div class="mb-3">
+            <label>Problem</label>
+            <textarea name="problem" class="form-control">{{ note.problem }}</textarea>
+        </div>
+        <button class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+
+{% endblock %}

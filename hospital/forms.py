@@ -51,7 +51,7 @@ from .models import Stock
 class StockForm(forms.ModelForm):
     class Meta:
         model = Stock
-        fields = ['wehave', 'contact', 'sold_today', 'remaining', 'system', 'stock_value', 'review1', 'review2',]
+        fields = ['date', 'wehave', 'contact', 'sold_today', 'remaining', 'system', 'stock_value', 'review1', 'review2',]
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
         }

@@ -35,7 +35,10 @@ urlpatterns = [
     path('delete-user/<int:user_id>/', delete_user_view, name='delete_user'),
 
     # Notifications
-    path('notifications/', notifications_view, name='notifications_view'),
+    path('view-notes/', view_notes, name='view_notes'),
+    path('notes/', notes_list, name='notes_list'),
+    path('edit-notes/<int:note_id>/', edit_note, name='edit_note'),
+    path('delete-notes/<int:note_id>/', delete_note, name='delete_note'),
     path('all-staff/', all_staff, name='all_staff'),  # 👈 New route
     path('edit-staff/<int:user_id>/', edit_staff, name='edit_staff'),
     path('delete-staff/<int:user_id>/', delete_staff, name='delete_staff'),

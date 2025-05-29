@@ -145,42 +145,33 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
-from .models import Store, Stock
-from .utils import save_note_to_cache
-
+from .models import Store, Stock, Note
 
 @login_required
 def add_stock(request, store_id):
     store = get_object_or_404(Store, id=store_id)
     today = date.today()
-
-    # Get yesterday's remaining stock
     yesterday = today - timedelta(days=1)
+
     previous_stock = Stock.objects.filter(store=store, date=yesterday).first()
     yesterday_remaining = previous_stock.remaining if previous_stock else 0
 
     if request.method == 'POST':
-        # Get form inputs
+        # Get form data
         contact = int(request.POST.get('contact') or 0)
         sold_today = int(request.POST.get('sold_today') or 0)
         remaining = int(request.POST.get('remaining') or 0)
         system = int(request.POST.get('system') or 0)
-        note = request.POST.get('note', '').strip()
 
         try:
             stock_value = Decimal(request.POST.get('stock_value') or '0')
         except InvalidOperation:
             stock_value = Decimal('0')
 
-        # Calculations
         wehave = yesterday_remaining
         abc = wehave + contact - sold_today
         review1 = abc - system
         review2 = abc - remaining
-
-        # Save note to cache
-        if note:
-            save_note_to_cache(note, request.user)
 
         # Create or update today's stock record
         stock_record, created = Stock.objects.get_or_create(
@@ -195,7 +186,6 @@ def add_stock(request, store_id):
                 'stock_value': stock_value,
                 'review1': review1,
                 'review2': review2,
-                'note': note,
             }
         )
 
@@ -209,7 +199,6 @@ def add_stock(request, store_id):
                 stock_record.stock_value = stock_value
                 stock_record.review1 = review1
                 stock_record.review2 = review2
-                stock_record.note = note
                 stock_record.save()
             elif request.user.is_staff:
                 stock_record.system = system
@@ -223,6 +212,20 @@ def add_stock(request, store_id):
                 stock_record.review2 = review2
                 stock_record.save()
 
+        # ✅ Create Notes with reference to stock_record
+        model_names = request.POST.getlist('model_name[]')
+        problems = request.POST.getlist('problem[]')
+
+        for model, problem in zip(model_names, problems):
+            if model.strip() or problem.strip():
+                Note.objects.create(
+                    stock=stock_record,        # ✅ Assign the correct stock
+                    store=store,
+                    user=request.user,
+                    model_name=model.strip(),
+                    problem=problem.strip()
+                )
+
         return redirect('store_stock_view', store_id=store.id)
 
     return render(request, 'add_stock.html', {
@@ -230,6 +233,8 @@ def add_stock(request, store_id):
         'yesterday_remaining': yesterday_remaining,
         'today': today.isoformat(),
     })
+
+
 
 
 
@@ -306,55 +311,12 @@ def add_user_to_store(request, store_id):
 
 
 
-from django.core.cache import cache
-import uuid
-from datetime import timedelta
 
-def save_user_note(request):
-    if request.method == 'POST':
-        note_text = request.POST.get('note')
-        user = request.user
-
-        if note_text:
-            key = f"note_{uuid.uuid4()}"
-            note_data = {
-                'user': user.username,
-                'note': note_text,
-            }
-
-            # Save note in cache for 24 hours
-            cache.set(key, note_data, timeout=86400)  # 24 hrs
-
-            # Track all note keys
-            existing_keys = cache.get('note_list') or []
-            existing_keys.append(key)
-            cache.set('note_list', existing_keys, timeout=86400)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-
-
-from django.core.cache import cache
-from datetime import timedelta
-from django.utils import timezone
-
-
-
-
-def notifications_view(request):
-    note_list = cache.get('note_list', [])
-    notifications = []
-    
-    for note_key in note_list:
-        note_data = cache.get(note_key)
-        if note_data:
-            notifications.append(note_data)
-    
-    return render(request, 'notifications.html', {
-        'notifications': notifications,
-    })
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from django.contrib.auth.models import User
@@ -583,14 +545,22 @@ def add_or_edit_stock(request, store_id):
         stock.stock_value = stock_value
         stock.review1 = review1
         stock.review2 = review2
-        stock.note = note
         stock.save()
 
-        # Save note to cache if any
-        if note:
-            save_note_to_cache(note, request.user)
+        # Save Notes
+        model_names = request.POST.getlist('model_name[]')
+        problems = request.POST.getlist('problem[]')
 
-        # Recalculate stock chain starting from selected_date
+        for model, problem in zip(model_names, problems):
+            if model.strip() or problem.strip():
+                Note.objects.create(
+                    stock=stock,
+                    store=store,
+                    user=request.user,
+                    model_name=model.strip(),
+                    problem=problem.strip()
+                )
+
         recalculate_stock_chain(store, selected_date)
 
         return redirect('store_stock_view', store_id=store.id)
@@ -673,3 +643,35 @@ def all_stores(request):
     stores = Store.objects.all()
     return render(request, 'all_stores.html', {'stores': stores})
 
+from django.contrib.admin.views.decorators import staff_member_required
+from .models import Note
+
+@staff_member_required
+def view_notes(request):
+    notes = Note.objects.select_related('store', 'user').order_by('-created_at')
+    return render(request, 'view_notes.html', {'notes': notes})
+
+@staff_member_required
+def edit_note(request, note_id):
+    note = get_object_or_404(Note, id=note_id)
+    if request.method == 'POST':
+        note.model_name = request.POST.get('model_name')
+        note.problem = request.POST.get('problem')
+        note.save()
+        return redirect('view_notes')
+    return render(request, 'edit_note.html', {'note': note})
+
+
+@staff_member_required
+def delete_note(request, note_id):
+    note = get_object_or_404(Note, id=note_id)
+    if request.method == 'POST':
+        note.delete()
+        return redirect('view_notes')
+    return render(request, 'delete_confirm.html', {'note': note})
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def notes_list(request):
+    notes = Note.objects.all().order_by('-created_at')
+    return render(request, 'notes_list.html', {'notes': notes})

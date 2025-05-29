@@ -1,5 +1,20 @@
 {% extends 'nvgbar.html' %}
 {% block body %}
+<script>
+function addNoteRow() {
+    const container = document.getElementById('note-container');
+    const row = document.createElement('div');
+    row.classList.add('note-row', 'mb-2');
+
+    row.innerHTML = `
+        <input type="text" name="model_name[]" class="form-control d-inline w-25 me-2" placeholder="Model">
+        <input type="text" name="problem[]" class="form-control d-inline w-50" placeholder="Problem">
+        <button type="button" class="btn btn-danger btn-sm ms-2" onclick="this.parentElement.remove()">Remove</button>
+    `;
+
+    container.appendChild(row);
+}
+</script>
 
 <div class="mt-3 d-flex justify-content-end">
     <a href="javascript:history.back()" class="btn btn-secondary">← Back</a>
@@ -84,13 +99,18 @@
             {% endif %}
 
             <!-- Note -->
-            <div class="form-floating mb-3">
-                <textarea class="form-control" id="note" name="note" placeholder="Describe any issue..."></textarea>
-                <label for="note">Issue Note</label>
-            </div>
+            <h5>Add Different Report</h5>
 
-            <!-- Store ID (hidden) -->
-            <input type="hidden" name="store_id" value="{{ store.id }}">
+<div id="note-container"></div>
+
+<button type="button" class="btn btn-sm btn-secondary my-2" onclick="addNoteRow()">+ Add </button>
+
+<!-- Hidden field to store serialized notes -->
+<input type="hidden" name="notes_json" id="notes-json">
+
+<!-- Store ID (hidden) -->
+<input type="hidden" name="store_id" value="{{ store.id }}">
+
 
             <div class="d-grid">
                 <button type="submit" class="btn btn-gradient">💾 Save Stock</button>
