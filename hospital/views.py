@@ -74,6 +74,11 @@ def custom_login_view(request):
    
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import json
+from django.utils.dateparse import parse_date
+from django.db.models import Sum
+from decimal import Decimal
+
 @login_required
 def index(request):
     stores = Store.objects.all()
@@ -90,24 +95,56 @@ def index(request):
         selected_date = parse_date(selected_date)
         stocks = stocks.filter(date=selected_date)
 
-    # Now do the aggregation based on the filtered stocks
+    # Aggregation for totals
     totals = stocks.aggregate(
         total_wehave=Sum('wehave'),
         total_system=Sum('system'),
-        total_contact=Sum('contact'),  total_sold=Sum('sold_today'),
+        total_contact=Sum('contact'),
+        total_sold=Sum('sold_today'),
         total_remaining=Sum('remaining'),
         total_review1=Sum('review1'),
         total_review2=Sum('review2'),
         total_stock_value=Sum('stock_value')
     )
 
-    
+    # Prepare last 7 days stock_value data for chart
+    import datetime
+    from django.utils.timezone import now
+
+    today = now().date()
+    last_7_days = [today - datetime.timedelta(days=i) for i in range(6, -1, -1)]  # oldest to newest
+
+    # Filter stocks for last 7 days and optional store filter
+    last_7_days_stocks = Stock.objects.filter(date__in=last_7_days)
+    if store_id:
+        last_7_days_stocks = last_7_days_stocks.filter(store_id=store_id)
+
+    # Aggregate stock_value by date
+    stock_values_qs = last_7_days_stocks.values('date').annotate(total_value=Sum('stock_value'))
+
+    # Build a dict for quick lookup
+    values_dict = {item['date']: item['total_value'] for item in stock_values_qs}
+
+    stock_value_data = []
+    for day in last_7_days:
+        value = values_dict.get(day, 0) or 0
+        # Convert Decimal to float
+        if isinstance(value, Decimal):
+            value = float(value)
+        stock_value_data.append({
+            'date': day.strftime('%Y-%m-%d'),
+            'value': value,
+        })
 
     context = {
         'stores': stores,
         'totals': totals,
+        'stock_value_data': json.dumps(stock_value_data),  # JSON string
     }
     return render(request, 'index.html', context)
+
+
+
 
 
 

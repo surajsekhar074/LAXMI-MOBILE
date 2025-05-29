@@ -2,7 +2,21 @@
 {% block body %}
 <div class="container mt-4">
     <h3>All Different Reports</h3>
-    <table class="table table-bordered table-hover mt-3">
+
+    <!-- Search and Action Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <!-- Search Input -->
+        <input type="text" id="searchInput" class="form-control w-25" placeholder="Search notes...">
+
+        <!-- Buttons -->
+        <div>
+            <button onclick="printTable()" class="btn btn-secondary me-2">🖨️ Print</button>
+            <button onclick="exportToExcel('notesTable', 'Notes_Report')" class="btn btn-success">📥 Export to Excel</button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <table class="table table-bordered table-hover mt-3" id="notesTable">
         <thead class="table-dark">
             <tr>
                 <th>Store</th>
@@ -32,4 +46,49 @@
         </tbody>
     </table>
 </div>
+
+<!-- Scripts -->
+<script>
+    // Live Search Filter
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+        var input = this.value.toLowerCase();
+        var rows = document.querySelectorAll("#notesTable tbody tr");
+
+        rows.forEach(function (row) {
+            row.style.display = row.textContent.toLowerCase().includes(input) ? "" : "none";
+        });
+    });
+
+    // Print Function
+    function printTable() {
+        var table = document.getElementById("notesTable").outerHTML;
+        var newWin = window.open();
+        newWin.document.write('<html><head><title>Print Notes</title></head><body>');
+        newWin.document.write(table);
+        newWin.document.write('</body></html>');
+        newWin.document.close();
+        newWin.print();
+    }
+
+    // Export to Excel
+    function exportToExcel(tableID, filename = '') {
+        let dataType = 'application/vnd.ms-excel';
+        let tableSelect = document.getElementById(tableID);
+        let tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+
+        filename = filename ? filename + '.xls' : 'export_data.xls';
+
+        let downloadLink = document.createElement("a");
+        document.body.appendChild(downloadLink);
+
+        if (navigator.msSaveOrOpenBlob) {
+            let blob = new Blob(['\ufeff', tableHTML], { type: dataType });
+            navigator.msSaveOrOpenBlob(blob, filename);
+        } else {
+            downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+            downloadLink.download = filename;
+            downloadLink.click();
+        }
+    }
+</script>
 {% endblock %}

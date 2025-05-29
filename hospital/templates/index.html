@@ -93,21 +93,7 @@
         }
     }
 
-    #stockBarChart {
-        box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
-        border-radius: 10px;
-        background: #fff;
-        padding: 10px;
-    }
-
-    .chart-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 40px;
-        margin-bottom: 40px;
-    }
-
+   
 </style>
 
 <div class="container-fluid">
@@ -146,25 +132,33 @@
     </div>
 </div>
 
-<div class="chart-wrapper">
-    <canvas id="stockBarChart" width="400" height="250"></canvas>
+<div class="charts-container">
+    <!-- Stock Summary Chart -->
+    <div class="chart-card">
+        <h3>📊 Stock Overview</h3>
+        <canvas id="stockBarChart"></canvas>
+    </div>
+
+    <!-- Stock Value Trend -->
+    <div class="chart-card">
+        <h3>💰 Stock Value (Last 7 Days)</h3>
+        <canvas id="stockValueChart"></canvas>
+    </div>
 </div>
 
+<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Stock Bar Chart Script -->
 <script>
     const ctxBar = document.getElementById('stockBarChart').getContext('2d');
-
-    const barColors = [
-        '#6366f1', '#8b5cf6', '#ec4899',
-        '#10b981', '#f59e0b', '#facc15', '#ef4444'
-    ];
 
     new Chart(ctxBar, {
         type: 'bar',
         data: {
             labels: ['Opening', 'Added', 'Sold', 'Physical', 'Diff 1', 'Diff 2', 'System'],
             datasets: [{
-                label: 'Stock',
+                label: 'Stock Summary',
                 data: [
                     {{ totals.total_wehave|default:0 }},
                     {{ totals.total_contact|default:0 }},
@@ -174,16 +168,24 @@
                     {{ totals.total_review2|default:0 }},
                     {{ totals.total_system|default:0 }}
                 ],
-                backgroundColor: barColors,
-                borderRadius: 6
+                backgroundColor: [
+                    '#3B82F6', '#10B981', '#F59E0B',
+                    '#EF4444', '#8B5CF6', '#EC4899', '#6366F1'
+                ],
+                borderRadius: 12,
+                barThickness: 40
             }]
         },
         options: {
-            responsive: false,
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
+                x: {
+                    ticks: { color: '#374151', font: { size: 14 } }
+                },
                 y: {
                     beginAtZero: true,
-                    ticks: { stepSize: 1 }
+                    ticks: { stepSize: 1, color: '#374151', font: { size: 14 } }
                 }
             },
             plugins: {
@@ -194,13 +196,95 @@
     });
 </script>
 
+<!-- Stock Value Chart Script -->
+<script>
+    const stockValueData = JSON.parse('{{ stock_value_data|escapejs }}');
+    const labels = stockValueData.map(item => item.date);
+    const values = stockValueData.map(item => item.value);
+
+    const ctxValue = document.getElementById('stockValueChart').getContext('2d');
+    new Chart(ctxValue, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Value ₹',
+                data: values,
+                backgroundColor: '#3B82F6',
+                borderRadius: 12,
+                barThickness: 40
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    ticks: { color: '#374151', font: { size: 14 } }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, color: '#374151', font: { size: 14 } }
+                }
+            },
+            plugins: {
+                legend: { display: true },
+                tooltip: { enabled: true }
+            }
+        }
+    });
+</script>
+
+<!-- Modern CSS Styling -->
 <style>
-.chart-wrapper {
+.charts-container {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    margin: 20px auto;
-    padding: 10px;
+    gap: 30px;
+    margin: 40px auto;
+    max-width: 1200px;
+}
+
+.chart-card {
+    background: white;
+    padding: 25px 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 550px;
+    transition: transform 0.2s ease;
+    height: 450px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card:hover {
+    transform: translateY(-6px);
+}
+
+.chart-card h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+canvas {
+    flex: 1;
+}
+
+/* Responsive layout for small screens */
+@media (max-width: 768px) {
+    .chart-card {
+        max-width: 100%;
+    }
 }
 </style>
+
+
+
+
 {% endif %}
 {% endblock %}
