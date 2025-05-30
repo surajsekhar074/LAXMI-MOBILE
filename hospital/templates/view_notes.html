@@ -22,7 +22,7 @@
                 <th>Store</th>
                 <th>User</th>
                 <th>Model</th>
-                <th>Problem</th>
+                <th>Remark</th>
                 <th>Date</th>
                 <th>Actions</th>
             </tr>
@@ -30,7 +30,7 @@
         <tbody>
             {% for note in notes %}
             <tr>
-                <td>{{ note.store.name }}</td>
+                <td>{{ note.store.location }}</td>
                 <td>{{ note.user.username }}</td>
                 <td>{{ note.model_name }}</td>
                 <td>{{ note.problem }}</td>

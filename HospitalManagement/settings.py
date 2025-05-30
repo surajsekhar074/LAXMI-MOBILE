@@ -82,6 +82,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'hospital.context_processors.admin_notifications',
                 'hospital.context_processors.store_list',
+                'hospital.context_processors.notification_count',
+
 
 
                 

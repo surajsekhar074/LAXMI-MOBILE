@@ -50,6 +50,7 @@ class Note(models.Model):
     model_name = models.CharField(max_length=100)
     problem = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    seen = models.BooleanField(default=False)  # 👈 NEW FIELD
 
     def __str__(self):
         return f"{self.model_name} - {self.problem[:20]}"

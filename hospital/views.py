@@ -681,12 +681,17 @@ def all_stores(request):
     return render(request, 'all_stores.html', {'stores': stores})
 
 from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render
 from .models import Note
 
 @staff_member_required
 def view_notes(request):
-    notes = Note.objects.select_related('store', 'user').order_by('-created_at')
+    if request.user.is_staff:
+        Note.objects.filter(seen=False).update(seen=True)
+
+    notes = Note.objects.all().order_by('-created_at')
     return render(request, 'view_notes.html', {'notes': notes})
+
 
 @staff_member_required
 def edit_note(request, note_id):

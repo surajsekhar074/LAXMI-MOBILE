@@ -215,10 +215,15 @@
   <a href="{% url 'view_notes' %}" class="hover:text-indigo-600 font-medium flex items-center space-x-2">
     <i class="fas fa-bell"></i>
     <span>Different Report</span>
-    <span class="badge bg-red-600 text-white rounded-full px-2 text-xs">{{ notifications|length }}</span>
+    {% if notifications|length > 0 %}
+      <span class="badge bg-red-600 text-white rounded-full px-2 text-xs">
+        {{ notifications|length }}
+      </span>
+    {% endif %}
   </a>
 </li>
 {% endif %}
+
 
 
 

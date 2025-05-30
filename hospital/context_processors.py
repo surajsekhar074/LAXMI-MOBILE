@@ -24,3 +24,14 @@ def store_list(request):
     stores = Store.objects.all()
     return {'stores': stores}
 
+
+
+from .models import Note
+
+def notification_count(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        notifications = Note.objects.filter(seen=False)
+        return {'notifications': notifications}
+    return {'notifications': []}
+
+
