@@ -138,7 +138,7 @@ function addNoteRow() {
         const review1Field = document.getElementById('review1');
         if (review1Field) {
             if (!isNaN(system) && sold_today_val) {
-                review1Field.value = abc - system;
+                review1Field.value = system - abc;
             } else {
                 review1Field.value = '';
             }

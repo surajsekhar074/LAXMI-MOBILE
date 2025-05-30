@@ -207,7 +207,7 @@ def add_stock(request, store_id):
 
         wehave = yesterday_remaining
         abc = wehave + contact - sold_today
-        review1 = abc - system
+        review1 = system - abc
         review2 = abc - remaining
 
         # Create or update today's stock record
@@ -568,7 +568,7 @@ def add_or_edit_stock(request, store_id):
         # Calculation
         wehave = yesterday_remaining
         abc = wehave + contact - sold_today
-        review1 = abc - system
+        review1 = system - abc
         review2 = abc - remaining
 
         # Save or update the Stock record
