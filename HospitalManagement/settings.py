@@ -110,8 +110,17 @@ from decouple import config
 import dj_database_url
 
 DATABASES = {
-    'default': dj_database_url.parse(config('DATABASE_URL'), ssl_require=True),
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'surajsekhar074$LAXMI-MOBILE',   # ✅ Exactly yahi likhna
+        'USER': 'surajsekhar074',
+        'PASSWORD': 'Suraj@123',                  # ✅ Jo MySQL ka password diya
+        'HOST': 'surajsekhar074.mysql.pythonanywhere-services.com',
+        'PORT': '3306',
+    }
 }
+
+
 
 
 
