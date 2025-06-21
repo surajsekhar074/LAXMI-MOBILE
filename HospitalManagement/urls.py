@@ -8,12 +8,6 @@ from django.urls import path
 from django.http import HttpResponse
 from django.core.management import call_command
 
-def run_migrations(request):
-    try:
-        call_command('migrate')
-        return HttpResponse("✅ Migrations completed.")
-    except Exception as e:
-        return HttpResponse(f"❌ Error: {e}")
 
 
 
@@ -26,8 +20,8 @@ urlpatterns = [
     # Authentication
     path('login/', custom_login_view, name='login'),
     path('logout/', logout_Admin, name='logout'),
-    # temporary
-    path('run-migrations/', run_migrations),
+
+    
 
 
     # Store and Stock
