@@ -12,6 +12,6 @@ services:
       - key: DEBUG
         value: true
       - key: DATABASE_URL
-        value: postgresql://laxmi_mobile_user:nFkMtEfaffEGM0o6E4wHOLiVsZYhEi4D@dpg-d0m5fjodl3ps73c1pncg-a.oregon-postgres.render.com/laxmi_mobile
+        value: postgresql://neondb_owner:npg_EJYXZL2jse6N@ep-lively-cloud-a17i2cw3-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
       - key: ALLOWED_HOSTS
         value: 127.0.0.1,localhost,laxmi-mobile-stock.onrender.com
