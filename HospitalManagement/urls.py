@@ -4,6 +4,18 @@ from hospital.views import *
 from django.http import HttpResponse
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import path
+from django.http import HttpResponse
+from django.core.management import call_command
+
+def run_migrations(request):
+    try:
+        call_command('migrate')
+        return HttpResponse("✅ Migrations completed.")
+    except Exception as e:
+        return HttpResponse(f"❌ Error: {e}")
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,6 +26,8 @@ urlpatterns = [
     # Authentication
     path('login/', custom_login_view, name='login'),
     path('logout/', logout_Admin, name='logout'),
+    # temporary
+    path('run-migrations/', run_migrations),
 
 
     # Store and Stock
@@ -43,6 +57,7 @@ urlpatterns = [
     path('edit-staff/<int:user_id>/', edit_staff, name='edit_staff'),
     path('delete-staff/<int:user_id>/', delete_staff, name='delete_staff'),
     path('stock/<int:store_id>/edit/', add_or_edit_stock, name='add_or_edit_stock'),
+    
 ]
 
 # Serve static files in development
