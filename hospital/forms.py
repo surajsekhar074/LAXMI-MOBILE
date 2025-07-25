@@ -102,3 +102,17 @@ def add_or_edit_stock(request, store_id):
         'is_edit': not created,
     })
 
+from django import forms
+from .models import StockTransfer, Store
+
+class StockTransferForm(forms.ModelForm):
+    class Meta:
+        model = StockTransfer
+        fields = ['to_store', 'quantity']
+
+    def __init__(self, *args, **kwargs):
+        from_store = kwargs.pop('from_store', None)  # we will pass this from views.py
+        super().__init__(*args, **kwargs)
+
+        if from_store:
+            self.fields['to_store'].queryset = Store.objects.exclude(id=from_store.id)

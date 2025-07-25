@@ -33,6 +33,8 @@ urlpatterns = [
     path('store/edit/<int:store_id>/', edit_store, name='edit_store'),
     path('store/delete/<int:store_id>/', delete_store, name='delete_store'),
     path('stores/', all_stores, name='all_stores'),
+    path('store/<int:store_id>/transfer/', transfer_stock, name='transfer_stock'),
+
 
 
     # Admin user management

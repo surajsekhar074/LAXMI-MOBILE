@@ -54,3 +54,27 @@ class Note(models.Model):
 
     def __str__(self):
         return f"{self.model_name} - {self.problem[:20]}"
+    
+
+
+
+
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+
+class StockTransfer(models.Model):
+    from_store = models.ForeignKey('Store', on_delete=models.CASCADE, related_name='transfers_given')
+    to_store = models.ForeignKey('Store', on_delete=models.CASCADE, related_name='transfers_received')
+    quantity = models.PositiveIntegerField()
+    date = models.DateField(default=timezone.now)
+    status = models.CharField(
+        max_length=20,
+        choices=[('pending', 'Pending'), ('received', 'Received')],
+        default='pending'
+    )
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.from_store} ➜ {self.to_store} | Qty: {self.quantity} | {self.status}"
+

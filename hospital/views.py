@@ -175,14 +175,17 @@ def register_store(request):
     return render(request, 'store_registrations.html')
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
-from .models import Store, Stock, Note
+from django.db.models import Sum
+
+from .models import Store, Stock, Note, StockTransfer
+
 
 @login_required
 def add_stock(request, store_id):
@@ -190,11 +193,33 @@ def add_stock(request, store_id):
     today = date.today()
     yesterday = today - timedelta(days=1)
 
+    # 🟡 Step 1: Get yesterday's remaining
     previous_stock = Stock.objects.filter(store=store, date=yesterday).first()
     yesterday_remaining = previous_stock.remaining if previous_stock else 0
 
+
+    # 🟢 Step 2: Add quantity from received transfers
+    transfer_in = StockTransfer.objects.filter(
+
+        to_store=store,
+        date=today,
+        status='received'
+    )
+
+    received_qty = sum(t.quantity for t in transfer_in)
+
+    # 🔴 Step 3: Subtract quantity sent (transferred out)
+    transfer_out = StockTransfer.objects.filter(
+        from_store=store,
+        date=today
+    )
+    transferred_qty = sum(t.quantity for t in transfer_out)
+
+    # 🟣 Final wehave = yesterday + received - sent
+    wehave = max(yesterday_remaining + received_qty - transferred_qty, 0)
+
+
     if request.method == 'POST':
-        # Get form data
         contact = int(request.POST.get('contact') or 0)
         sold_today = int(request.POST.get('sold_today') or 0)
         remaining = int(request.POST.get('remaining') or 0)
@@ -205,12 +230,10 @@ def add_stock(request, store_id):
         except InvalidOperation:
             stock_value = Decimal('0')
 
-        wehave = yesterday_remaining
         abc = wehave + contact - sold_today
         review1 = abc - system
         review2 = abc - remaining
 
-        # Create or update today's stock record
         stock_record, created = Stock.objects.get_or_create(
             store=store,
             date=today,
@@ -249,14 +272,14 @@ def add_stock(request, store_id):
                 stock_record.review2 = review2
                 stock_record.save()
 
-        # ✅ Create Notes with reference to stock_record
+        # Notes add karne ka code (same as before)
         model_names = request.POST.getlist('model_name[]')
         problems = request.POST.getlist('problem[]')
 
         for model, problem in zip(model_names, problems):
             if model.strip() or problem.strip():
                 Note.objects.create(
-                    stock=stock_record,        # ✅ Assign the correct stock
+                    stock=stock_record,
                     store=store,
                     user=request.user,
                     model_name=model.strip(),
@@ -268,6 +291,8 @@ def add_stock(request, store_id):
     return render(request, 'add_stock.html', {
         'store': store,
         'yesterday_remaining': yesterday_remaining,
+        'received_qty': received_qty,
+        'wehave': wehave,  # ✅ This will now show: remaining + transfer-in
         'today': today.isoformat(),
     })
 
@@ -338,24 +363,6 @@ def add_user_to_store(request, store_id):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
@@ -515,6 +522,9 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime, timedelta
 from .models import Store, Stock
 from .forms import StockForm
+from django.db.models import Sum  # 👈 import Sum for aggregation
+from .models import StockTransfer  # 👈 also import StockTransfer model
+
 
 @login_required
 def add_or_edit_stock(request, store_id):
@@ -534,6 +544,24 @@ def add_or_edit_stock(request, store_id):
         yesterday_remaining = yesterday_stock.remaining
     except Stock.DoesNotExist:
         yesterday_remaining = 0
+
+            # 🔄 Check transfer out
+    transferred_out_qty = StockTransfer.objects.filter(
+        from_store=store,
+        date=selected_date
+    ).aggregate(total_out=Sum('quantity'))['total_out'] or 0
+
+    # 🔄 Check received in
+    received_qty = StockTransfer.objects.filter(
+        to_store=store,
+        date=selected_date,
+        status='received'
+    ).aggregate(total_in=Sum('quantity'))['total_in'] or 0
+
+    # 🔢 Calculate final opening stock
+    calculated_wehave = max(yesterday_remaining - transferred_out_qty + received_qty, 0)
+
+
 
     stock = Stock.objects.filter(store=store, date=selected_date).first()
 
@@ -566,7 +594,7 @@ def add_or_edit_stock(request, store_id):
             stock_value = Decimal('0')
 
         # Calculation
-        wehave = yesterday_remaining
+        wehave = calculated_wehave
         abc = wehave + contact - sold_today
         review1 = abc - system
         review2 = abc - remaining
@@ -609,6 +637,8 @@ def add_or_edit_stock(request, store_id):
             'selected_date': selected_date,
             'yesterday_remaining': yesterday_remaining,
             'stock': stock,
+            'calculated_wehave': calculated_wehave,
+
         }
         return render(request, 'add_or_edit_stock.html', context)
 
@@ -717,3 +747,81 @@ from django.contrib.admin.views.decorators import staff_member_required
 def notes_list(request):
     notes = Note.objects.all().order_by('-created_at')
     return render(request, 'notes_list.html', {'notes': notes})
+
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.db.models import Q
+from django.contrib import messages
+from datetime import timedelta
+
+from .models import StockTransfer, Stock, Store
+from .forms import StockTransferForm
+
+@login_required
+def transfer_stock(request, store_id):
+    from_store = get_object_or_404(Store, id=store_id)
+    today = timezone.now().date()
+
+    if request.method == 'POST':
+        # 1️⃣ Receive Button Clicked
+        if 'receive_transfer_id' in request.POST:
+            transfer_id = request.POST.get('receive_transfer_id')
+            try:
+                transfer = StockTransfer.objects.get(id=transfer_id, to_store=from_store)
+                if transfer.status == 'pending':
+                    transfer.status = 'received'
+                    transfer.save()
+
+                    # ✅ Only update existing stock row, don't create new one
+                    try:
+                        stock_obj = Stock.objects.get(store=from_store, date=transfer.date)
+                        stock_obj.wehave += transfer.quantity
+                        stock_obj.save()
+                        messages.success(request, "✅ Stock received successfully.")
+                    except Stock.DoesNotExist:
+                        messages.warning(request, "⚠️ Transfer received, but stock not added (stock row missing).")
+
+                else:
+                    messages.info(request, "Already received.")
+            except StockTransfer.DoesNotExist:
+                messages.error(request, "Transfer not found.")
+            return redirect(request.path)
+
+        # 2️⃣ New Transfer Submit
+        else:
+            form = StockTransferForm(request.POST, from_store=from_store)
+            if form.is_valid():
+                transfer = form.save(commit=False)
+                transfer.from_store = from_store
+                transfer.created_by = request.user
+                transfer.date = today
+                transfer.status = 'pending'
+                transfer.save()
+
+                # ✅ Try subtracting from today's stock if exists
+                try:
+                    stock_obj = Stock.objects.get(store=from_store, date=today)
+                    stock_obj.wehave = max(stock_obj.wehave - transfer.quantity, 0)
+                    stock_obj.save()
+                except Stock.DoesNotExist:
+                    # ✅ If no stock row exists for today, don't create one
+                    messages.warning(request, "⚠️ Transfer saved but stock row not found, stock not deducted.")
+
+                messages.success(request, "📦 Stock transferred successfully.")
+                return redirect(request.path)
+    else:
+        form = StockTransferForm(from_store=from_store)
+
+    transfers = StockTransfer.objects.filter(
+        Q(from_store=from_store) | Q(to_store=from_store)
+    ).order_by('-date')
+
+    return render(request, 'transfer_stock.html', {
+        'form': form,
+        'transfers': transfers,
+        'from_store': from_store,
+        'current_store': from_store
+    })

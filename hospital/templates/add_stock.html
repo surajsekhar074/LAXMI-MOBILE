@@ -33,9 +33,10 @@ function addNoteRow() {
 
             {% if request.user.is_staff %}
 <div class="form-floating mb-3">
-    <input type="number" id="wehave" name="wehave" class="form-control" value="{{ yesterday_remaining }}" readonly required>
+    <input type="number" id="wehave" class="form-control" value="{{ wehave }}" readonly>
     <label for="wehave">Opening Stock</label>
 </div>
+
 {% else %}
 <input type="hidden" id="wehave" name="wehave" value="{{ yesterday_remaining }}">
 {% endif %}

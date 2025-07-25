@@ -7,11 +7,14 @@
 </div>
 {% endif %}
 {% if request.user.is_staff %}
-<form method="get" action="{% url 'add_or_edit_stock' store.id %}">
-  <label for="date">Select Date:</label>
-  <input type="date" name="date" id="date" value="{{ today|date:'Y-m-d' }}">
-  <button type="submit" class="btn btn-success">Add/Edit Stock</button>
-</form>
+<div class="stock-toolbar mb-4">
+  <form method="get" action="{% url 'add_or_edit_stock' store.id %}" class="d-flex flex-wrap align-items-center gap-2">
+    <label for="date" class="me-2 fw-semibold">📅 Select Date:</label>
+    <input type="date" name="date" id="date" class="form-control form-control-sm" value="{{ today|date:'Y-m-d' }}" required>
+    <button type="submit" class="btn btn-success modern-button">Add/Edit Stock</button>
+  </form>
+</div>
+
 {% endif %}
 
 <!-- Bootstrap CSS & JS (Latest stable 5.3.x) -->
@@ -92,6 +95,47 @@
         color: green;
     }
 
+    .stock-toolbar {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.stock-toolbar label {
+    font-weight: 500;
+    color: #333;
+}
+
+.stock-toolbar input[type="date"] {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    max-width: 180px;
+}
+
+.stock-toolbar .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 8px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.stock-toolbar .btn:hover {
+    background-color: #218838;
+}
+
+    
+</style>
+
+
+<style>
     @media (max-width: 768px) {
         h2 {
             font-size: 20px;
@@ -116,23 +160,32 @@
         }
     }
 </style>
+    
+
+    
+
+    
+
+
 
 <h2 class="text-center mt-4">{{ store.location }}</h2>
 
 <div class="container mt-4">
 
+    
     <!-- Add Stock Button -->
-     {% if request.user.is_superuser %}
+    
      <div class="text-end mb-3">
         <a href="{% url 'add_stock' store.id %}" class="btn btn-success modern-button">Reporting</a>
+        <br> <br>
+
+        <div class="text-end mb-3">
+        <a href="{% url 'transfer_stock' store.id %}" class="btn btn-success modern-button">Transfer</a>
     </div>
-{% else %}
-     {% if request.user.is_active and not request.user.is_staff %}
-    <div class="text-end mb-3">
-        <a href="{% url 'add_stock' store.id %}" class="btn btn-success modern-button">Reporting</a>
+
     </div>
-    {% endif %}
-    {% endif %}
+
+   
     
     <div class="mb-3">
         <input type="text" id="searchInput" class="form-control" placeholder="Search stock records..." onkeyup="searchTable()">
