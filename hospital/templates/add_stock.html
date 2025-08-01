@@ -31,15 +31,15 @@ function addNoteRow() {
                 <input type="date" name="date" id="date" class="form-control" value="{{ today }}" min="{{ today }}" required>
             </div>
 
-            {% if request.user.is_staff %}
+           {% if request.user.is_staff %}
 <div class="form-floating mb-3">
     <input type="number" id="wehave" class="form-control" value="{{ wehave }}" readonly>
     <label for="wehave">Opening Stock</label>
 </div>
-
 {% else %}
-<input type="hidden" id="wehave" name="wehave" value="{{ yesterday_remaining }}">
+<input type="hidden" id="wehave" name="wehave" value="{{ wehave }}">
 {% endif %}
+
 
             <!-- Add Stock -->
             <div class="form-floating mb-3">

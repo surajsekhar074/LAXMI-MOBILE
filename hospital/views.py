@@ -642,40 +642,55 @@ def add_or_edit_stock(request, store_id):
         }
         return render(request, 'add_or_edit_stock.html', context)
 
+from django.db.models import Sum
+
 def recalculate_stock_chain(store, from_date):
     """
-    Recalculate opening (wehave), remaining, and reviews for stocks from from_date onwards
+    Recalculate opening (wehave), review1, and review2 for stocks from from_date onwards
+    considering stock transfers (in and out).
     """
     stocks = Stock.objects.filter(store=store, date__gte=from_date).order_by('date')
 
-    # Get previous stock before from_date for opening calculation
     try:
         prev_stock = Stock.objects.filter(store=store, date__lt=from_date).latest('date')
     except Stock.DoesNotExist:
         prev_stock = None
 
     for stock in stocks:
-        # Opening stock (wehave) = previous day's remaining
+        # Step 1: Calculate opening based on previous day's remaining
         if prev_stock:
-            stock.wehave = prev_stock.remaining
+            opening = prev_stock.remaining
         else:
-            stock.wehave = 0
+            opening = 0
 
-        # Calculate abc = wehave + contact - sold_today
-        abc = stock.wehave + (stock.contact or 0) - (stock.sold_today or 0)
+        # Step 2: Adjust opening based on transfers
+        transfer_in = StockTransfer.objects.filter(
+            to_store=store,
+            date=stock.date,
+            status='received'
+        ).aggregate(total=Sum('quantity'))['total'] or 0
 
-        # review1 = abc - system
-        stock.review1 = abc - (stock.system or 0)
+        transfer_out = StockTransfer.objects.filter(
+            from_store=store,
+            date=stock.date
+        ).aggregate(total=Sum('quantity'))['total'] or 0
 
-        # review2 = abc - remaining
-        stock.review2 = abc - (stock.remaining or 0)
+        stock.wehave = max(opening + transfer_in - transfer_out, 0)
 
-        # Calculate remaining if you want to auto-set (optional)
-        # stock.remaining = stock.wehave + stock.contact - stock.sold_today
+        # Step 3: Calculate abc
+        contact = stock.contact or 0
+        sold_today = stock.sold_today or 0
+        abc = stock.wehave + contact - sold_today
 
+        # Step 4: Calculate review1 and review2
+        system = stock.system or 0
+        remaining = stock.remaining or 0
+        stock.review1 = abc - system
+        stock.review2 = abc - remaining
+
+        # Step 5: Save and move to next
         stock.save()
         prev_stock = stock
-
 
 
 
